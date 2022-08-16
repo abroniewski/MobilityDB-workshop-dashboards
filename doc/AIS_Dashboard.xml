@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-n
 <chapter id ="AISDashboard">
     <title>Dashboard and Visualization of Ship Trajectories (AIS)</title>
         <para>
@@ -94,9 +93,54 @@ sudo apt-get install grafana-enterprise
     </section>
 
     <section>
-            <title>Creating a Dashboard</title>
+        <title>Creating a Dashboard</title>
+            <para>With the dashboard setup and configure, we will now build different panels to visualize data in intuitive ways.</para>
         <section>
             <title>Speed of Individual Ships</title>
+            <para>Let’s visualize the speed of the ships using the previously build query. Here we will represent it as a statistic with a color gradient.
+                <orderedlist>
+                    <listitem></listitem>
+
+                    <listitem><para>Add a new panel</para></listitem>
+                    <listitem><para>Select *DanishAIS* as the data source</para></listitem>
+                    <listitem><para>In Format as, change “Time series” to “Table” and choose “Edit SQL”</para></listitem>
+                    <listitem><para>Here you can add your SQL queries. Let’s replace the exist query with the following SQL script:
+                        <programlisting>
+SELECT mmsi, ABS(twavg(SOG) * 1.852 - twavg(speed(Trip))* 3.6 ) AS SpeedDifference
+FROM Ships
+ORDER BY SpeedDifference DESC
+LIMIT 5;
+                        </programlisting>
+                    </para></listitem>
+                    <listitem><para>We can also quickly do some datatype transformations to help Grafana correctly interpret the incoming data. Next to the Query button, select “Transform”, add “Convert field type” and choose mmsi as String.</para></listitem>
+                        <figure id="imgvizconverttype" float="start"><title>Convert type</title>
+				            <mediaobject>
+					            <imageobject><imagedata width='80%' fileref='images/vizConvertType.png'/></imageobject>
+				            </mediaobject>
+			            </figure>
+                    <listitem>
+                        <para>We will modify some of the visualization options in the panel on the right.</para>
+                        <para>First, choose stat as the visualization</para>
+                        <figure id="imgvizchoosetype" float="start"><title>Convert type</title>
+				            <mediaobject>
+					            <imageobject><imagedata width='80%' fileref='images/vizChooseType.png'/></imageobject>
+				            </mediaobject>
+			            </figure>
+                        <para>Panel Options: Give the panel the title <italic> Incorrect AIS Boat Speed Reporting</italic></para>
+                        <para>Value Options:
+                                <listitem>
+                                    <para>Show: All values</para>
+                                </listitem>
+                                <listitem>
+                                    <para>Fields: speeddifference</para>
+                                    <para>Note: we can include a limit here instead of in our SQL query as well.</para>
+                                </listitem>
+                        </para>
+                    </listitem>
+
+
+                </orderedlist>
+            </para>
         </section>
         <section>
             <title>Routes Used Most Frequently Visualized with a Static Heat Map</title>
