@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<chapter id ="AISDashboard">
+    <title>Dashboard and Visualization of Ship Trajectories (AIS)</title>
+        <para>
+        This module builds on the Managing Ship Trajectories (AIS) module by creating a business intelligence dashboard to visualize and manipulate data. The module shows how to setup a Grafana dashboard with an existing database, create basic visualizations, set properties for different outputs, and use Variables to create dynamic visuals.
+        </para>
+
+        <section>
+            <title>Contents</title>
+            <para>
+                This module covers the following topics:
+				<itemizedlist>
+                    <listitme>
+                        <para>Setting up a Grafana dashboard and connecting to a database</para>
+                    </listitme>
+                    <listitme>
+                        <para>Visualize a statistic from simple aggregations</para>
+                    </listitme>
+                    <listitme>
+                        <para>Visualize spatial frequency with a heat-map (not aggregated)</para>
+                    </listitme>
+                    <listitme>
+                        <para>Visualize frequency in spatial extent with a heat-map (pre-aggregated)</para>
+                    </listitme>
+                    <listitme>
+                        <para>Visualize spatio-temporal proximate objects</para>
+                    </listitme>
+                    <listitme>
+                        <para>Create dynamic queries with variables</para>
+                    </listitme>
+                </itemizedlist>
+            </para>
+        </section>
+
+        <section>
+            <title>Tools</title>
+            <para>
+                The tools used in this module are as follows:
+                <itemizedlist>
+                    <listitem>
+                        <para>MobilityDB, on top of PostgreSQL and PostGIS</para>
+                    </listitem>
+                    <listitem>
+                        <para>QGIS</para>
+                    </listitem>
+                    <listitem>
+                        <para>Grafana</para>
+                    </listitem>
+                </itemizedlist>
+            </para>
+    </section>
+
+</chapter>
