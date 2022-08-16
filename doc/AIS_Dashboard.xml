@@ -92,4 +92,35 @@ sudo apt-get install grafana-enterprise
     <section>
             <title>Sign in and Connect to Data Source</title>
     </section>
+
+    <section>
+            <title>Creating a Dashboard</title>
+        <section>
+            <title>Speed of Individual Ships</title>
+        </section>
+        <section>
+            <title>Routes Used Most Frequently Visualized with a Static Heat Map</title>
+        </section>
+        <section>
+            <title>Number of Boats Moving Through a Given Area</title>
+        </section>
+        <section>
+            <title>Boats in Close Proximity in a Given Time Range</title>
+        </section>
+        <section>
+            <title>Routes Used Most Frequently Visualized with a Static Heat Map</title>
+        </section>
+    </section>
+
+    <section>
+        <title>Dynamic Dashboards - Using Variables to Manipulate Queries</title>
+        <section>
+            <title>Creating Variable</title>
+        </section>
+        <section>
+            <title>Dynamic Query: Number of Boats Moving Through a Given Area in a Certain Time Period</title>
+        </section>
+    </section>
+
+
 </chapter>
