@@ -91,7 +91,46 @@ sudo apt-get install grafana-enterprise
 
     <section>
             <title>Sign in and Connect to Data Source</title>
+            <para>We can now sign in to Grafana by going to <ulink url="http://localhost:3000/">http://localhost:3000/</ulink>. Setup a new account if needed. Additional instructions to 
+            login can be found here following the <ulink url="https://grafana.com/docs/grafana/latest/getting-started/build-first-dashboard/">build your first dashboard instructions</ulink>.</para>
+            <para>Next, we add a data source for Grafana to interact with. In this case, we can follow the <ulink url="https://grafana.com/docs/grafana/latest/datasources/add-a-data-source/">
+            Grafana instructions for adding a data source</ulink> and search for <ulink url="https://grafana.com/docs/grafana/latest/datasources/postgres/">PostgreSQL</ulink> as the data source.</para>
+            <para>The workshop is using the following settings to connect to the postgres server on Azure.</para>
+
+				<itemizedlist>
+                    <listitem>
+                        <para>Name: DanishAIS</para>
+                    </listitem>
+                    <listitem>
+                        <para>Host: 20.79.254.53:5432</para>
+                    </listitem>
+                    <listitem>
+                        <para>Database: danishais</para>
+                    </listitem>
+                    <listitem>
+                        <para>User: mobilitydb-guest</para>
+                    </listitem>
+                    <listitem>
+                        <para>Password: mobilitydb@guest</para>
+                    </listitem>
+                    <listitem>
+                        <para>TLS/SSL Mode: disable</para>
+                    </listitem>
+                    <listitem>
+                        <para>Version: 12+</para>
+                    </listitem>
+                </itemizedlist>
+
+        <para>Then press save and test</para>
+        <figure id="imgvizDataSrcPostgres" float="start"><title>Data Source Postgres Settings</title>
+            <mediaobject>
+                <imageobject><imagedata width='80%' fileref='images/vizDataSrcPostgres.png'/></imageobject>
+            </mediaobject>
+        </figure>
+
+
     </section>
+
 
     <section>
             <title>Creating a Dashboard</title>
