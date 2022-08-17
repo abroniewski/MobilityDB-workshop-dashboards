@@ -19,10 +19,10 @@ CREATE TABLE flights(
     alert           boolean,
     spi             boolean,
     squawk          integer,
-    baroaltitude    float,
-    geoaltitude     float,
-    lastposupdate   float,
-    lastcontact     float
+    baroaltitude    numeric(7,2),
+    geoaltitude     numeric(7,2),
+    lastposupdate   numeric(13,3),
+    lastcontact     numeric(13,3)
 );
 
 -- statement to copy data. Location should be changes to user's local location for data
@@ -30,7 +30,7 @@ COPY flights(et, icao24, lat, lon, velocity, heading, vertrate, callsign, ongrou
 FROM '/Users/adambroniewski/DATA for Projects/OpenSky Data/states_2020-06-01-00.csv/states_2020-06-01-00.csv' DELIMITER  ',' CSV HEADER;
 
 -- checking to make sure import worked correctly
-SELECT * FROM flights ORDER BY lat LIMIT 5;
+SELECT * FROM flights WHERE lat IS NOT NULL ORDER BY lat desc LIMIT 5;
 
 -- ***********
 -- ***TRANSFORMING TIME***
