@@ -1,3 +1,5 @@
+CREATE EXTENSION MobilityDB CASCADE;
+
 -- ***********
 -- ***CREATING TABLES AND UPLOADING DATA***
 -- ***********
@@ -163,3 +165,30 @@ SELECT * FROM flights ORDER BY lat LIMIT 5;
 -- QUERY: total flight time
 -- QUERY: total ground time
 --
+
+CREATE INDEX icao24_time_index
+    ON flights (icao24, et_ts);
+
+ALTER TABLE flights
+    ADD COLUMN geom geometry(Point, 4326);
+
+UPDATE flights SET
+  geom = ST_SetSRID( ST_MakePoint( lon, lat ), 4326);
+
+
+---- FINAL----
+CREATE TABLE flight_traj(icao24, trip, velocity, heading, vertrate, callsign, squawk, geoaltitude) AS
+    SELECT icao24,
+        tgeompoint_seq(array_agg(tgeompoint_inst(geom, et_ts) ORDER BY et_ts) FILTER (WHERE geom IS NOT NULL)),
+        tfloat_seq(array_agg(tfloat_inst(velocity, et_ts) ORDER BY et_ts) FILTER (WHERE velocity IS NOT NULL)),
+        tfloat_seq(array_agg(tfloat_inst(heading, et_ts) ORDER BY et_ts) FILTER (WHERE heading IS NOT NULL)),
+        tfloat_seq(array_agg(tfloat_inst(vertrate, et_ts) ORDER BY et_ts) FILTER (WHERE vertrate IS NOT NULL)),
+        ttext_seq(array_agg(ttext_inst(callsign, et_ts) ORDER BY et_ts) FILTER (WHERE callsign IS NOT NULL)),
+        tint_seq(array_agg(tint_inst(squawk, et_ts) ORDER BY et_ts) FILTER (WHERE squawk IS NOT NULL)),
+        tfloat_seq(array_agg(tfloat_inst(geoaltitude, et_ts) ORDER BY et_ts) FILTER (WHERE geoaltitude IS NOT NULL))
+    FROM sample
+    GROUP BY icao24;
+
+
+
+
