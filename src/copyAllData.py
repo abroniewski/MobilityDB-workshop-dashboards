@@ -1,19 +1,28 @@
 import psycopg2
 import glob
+import os
 
 conn = psycopg2.connect(database="openskylocal", user = "adambroniewski", password = "password", host = "localhost", port = "5432")
 print("Opened database successfully")
 
 cur = conn.cursor()
-path = "/Users/adambroniewski/DATA for Projects/OpenSky Data/*.csv"
+path = "/Users/adambroniewski/DATA for Projects/OpenSky Data"
 
-for fname in glob.glob(path):
-    copy_command = f""
-    cur.execute('''
-        COPY flights(et, icao24, lat, lon, velocity, heading, vertrate, callsign, onground, alert, spi, squawk, baroaltitude, geoaltitude, lastposupdate, lastcontact)
-        FROM '/Users/adambroniewski/DATA for Projects/OpenSky Data/states_2020-06-01-00.csv/states_2020-06-01-00.csv' DELIMITER  ',' CSV HEADER;
-        ''')
-    print("Table dropped successfully")
 
-conn.commit()
+for directory in os.listdir(path):
+    if directory.endswith(".csv"):
+        directory_path = os.path.join(path,directory)
+        for fname in os.listdir(directory_path):
+            if fname.endswith(".csv"):
+                fname_path = os.path.join(directory_path,fname)
+                copy_command = f'''
+                    COPY flights(et, icao24, lat, lon, velocity, heading, vertrate, callsign, onground, alert, spi, squawk, baroaltitude, geoaltitude, lastposupdate, lastcontact)
+                    FROM '{fname_path}' DELIMITER  ',' CSV HEADER;'''
+
+
+                cur.execute(copy_command)
+                conn.commit()
+                print(f"Added csv from {copy_command}")
+
 conn.close()
+print("Data import complete!")
