@@ -64,11 +64,15 @@ CREATE MATERIALIZED VIEW sample AS
 SELECT COUNT(*) FROM sample;
 SELECT pg_size_pretty( pg_total_relation_size('sample') );
 
+-- ***********************************************
+-- ***REMOVING WHITESPACE FROM varchar***
+-- ***********************************************
 
+UPDATE flights SET callsign = TRIM(callsign);
 
--- ***********
+-- ***********************************************
 -- ***REMOVING TRANSPONDERS WITH NULL LOCATIONS***
--- ***********
+-- ***********************************************
 
 -- Let's get some stats to see what we are starting with
 SELECT COUNT(*) FROM flights; -- 25,769,605 rows
@@ -184,7 +188,7 @@ UPDATE flights SET
 --      In this case, it will create an array for each icao24
 -- 3. tgeompoint_seq: constructs the array as a sequence which can be manipulated with mobilityDB functionality
 -- The same approach is used for each trajectory, with the function used changing depending on the datatype
-EXPLAIN (ANALYSE TRUE, COSTS FALSE) CREATE TABLE flight_traj(icao24, trip, velocity, heading, vertrate, callsign, squawk, geoaltitude) AS
+CREATE TABLE flight_traj(icao24, trip, velocity, heading, vertrate, callsign, squawk, geoaltitude) AS
     SELECT icao24,
         tgeompoint_seq(array_agg(tgeompoint_inst(geom, et_ts) ORDER BY et_ts) FILTER (WHERE geom IS NOT NULL)),
         tfloat_seq(array_agg(tfloat_inst(velocity, et_ts) ORDER BY et_ts) FILTER (WHERE velocity IS NOT NULL)),
@@ -196,5 +200,48 @@ EXPLAIN (ANALYSE TRUE, COSTS FALSE) CREATE TABLE flight_traj(icao24, trip, veloc
     FROM flights
     GROUP BY icao24;
 -- 26,528 rows created, execution: 2 m 23 s
+
+
+REFRESH MATERIALIZED VIEW sample;
+CREATE MATERIALIZED VIEW sample_traj AS
+    SELECT *
+    FROM flight_traj
+    WHERE icao24 IN ('738286');
+
+SELECT * FROM sample_traj;
+SELECT callsign FROM sample_traj;
+SELECT timestamps(callsign) FROM sample_traj;
+SELECT instants(callsign) FROM sample_traj;
+SELECT unnest(timestamps(callsign)) FROM sample_traj;
+
+
+SELECT timestamps(callsign) FROM sample_traj;
+SELECT timestampset(timestamps(callsign)) FROM sample_traj;
+SELECT CAST(timestampset(timestamps(callsign)) AS periodset) FROM sample_traj;
+
+
+
+WITH time_table AS(
+    SELECT unnest(timestamps(callsign)) AS ttime
+    FROM sample_traj
+)
+SELECT ttime,
+       LEAD (ttime, 1) OVER()
+FROM time_table
+ORDER BY ttime;
+
+SELECT periodset(segments(velocity))
+FROM sample_traj;
+
+SELECT periodset(segments(callsign))
+FROM sample_traj;
+
+SELECT ttext '(A@2000-01-01, B@2000-01-03], (D@2000-01-04, C@2000-01-05]'::period;
+
+-- Restriction to a period
+SELECT DeptNo, atPeriod(velocity, '[2012-01-01, 2012-04-01]')
+FROM Department;
+
+
 
 
