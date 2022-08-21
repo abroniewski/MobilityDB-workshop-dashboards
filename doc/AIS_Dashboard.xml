@@ -1,20 +1,14 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <chapter id ="AIS_Dashboard">
-  <info>
-    <title></title>
-  </info>
-  <section xml:id="dashboard-and-visualization-of-ship-trajectories-ais">
-    <title>Dashboard and Visualization of Ship Trajectories
-    (AIS)</title>
-    <para>
-      This module builds on the Managing Ship Trajectories (AIS) module
-      by creating a business intelligence dashboard to visualize and
-      manipulate data. The module shows how to setup a Grafana dashboard
-      with an existing database, create basic visualizations, set
-      properties for different outputs, and use Variables to create
-      dynamic visuals.
-    </para>
-  </section>
+  <title>Dashboard and Visualization of Ship Trajectories (AIS)</title>
+  <para>
+    This module builds on the Managing Ship Trajectories (AIS) module by
+    creating a business intelligence dashboard to visualize and
+    manipulate data. The module shows how to setup a Grafana dashboard
+    with an existing database, create basic visualizations, set
+    properties for different outputs, and use Variables to create
+    dynamic visuals.
+  </para>
   <section xml:id="contents">
     <title>Contents</title>
     <para>
@@ -57,8 +51,7 @@
   <section xml:id="tools">
     <title>Tools</title>
     <para>
-      The tools used in this module are as follows: (todo Add version of
-      these softwares)
+      The tools used in this module are as follows:
     </para>
     <itemizedlist spacing="compact">
       <listitem>
@@ -68,12 +61,7 @@
       </listitem>
       <listitem>
         <para>
-          QGIS
-        </para>
-      </listitem>
-      <listitem>
-        <para>
-          Grafana
+          Grafana (version 9.0.7)
         </para>
       </listitem>
     </itemizedlist>
@@ -139,6 +127,9 @@ sudo apt-get install grafana-enterprise
       <listitem>
         <para>
           <ulink url="https://grafana.com/docs/grafana/latest/setup-grafana/installation/windows/">Windows</ulink>
+        </para>
+        <para>
+          Use the windows installer available at the Grafana website.
         </para>
       </listitem>
     </orderedlist>
@@ -209,7 +200,7 @@ sudo apt-get install grafana-enterprise
       <title>DataSource Settings</title>
       <mediaobject>
         <imageobject>
-          <imagedata fileref="images/Untitled.png" />
+          <imagedata width='80%' fileref="images/Untitled.png" />
         </imageobject>
         <textobject><phrase>DataSource Settings</phrase></textobject>
       </mediaobject>
@@ -269,14 +260,18 @@ LIMIT 5;
             <emphasis>mmsi</emphasis> as <emphasis>String.</emphasis>
           </para>
           <figure>
-            <title>Untitled</title>
+            <title>Datatype transformations in Grafana</title>
             <mediaobject>
               <imageobject>
-                <imagedata fileref="images/Untitled%201.png" />
+                <imagedata width='80%' fileref="images/Untitled%201.png" />
               </imageobject>
-              <textobject><phrase>Untitled</phrase></textobject>
+              <textobject><phrase>Datatype transformations in
+              Grafana</phrase></textobject>
             </mediaobject>
           </figure>
+          <para>
+            Datatype transformations in Grafana
+          </para>
         </listitem>
         <listitem>
           <para>
@@ -287,14 +282,18 @@ LIMIT 5;
             First, choose <emphasis>stat</emphasis> as the visualization
           </para>
           <figure>
-            <title>Untitled</title>
+            <title>Choosing visualization type</title>
             <mediaobject>
               <imageobject>
-                <imagedata fileref="images/Untitled%202.png" />
+                <imagedata width='80%' fileref="images/Untitled%202.png" />
               </imageobject>
-              <textobject><phrase>Untitled</phrase></textobject>
+              <textobject><phrase>Choosing visualization
+              type</phrase></textobject>
             </mediaobject>
           </figure>
+          <para>
+            Choosing visualization type
+          </para>
           <para>
             <emphasis role="strong">Panel Options:</emphasis> Give the
             panel the title <emphasis>Incorrect AIS Boat Speed
@@ -314,14 +313,18 @@ LIMIT 5;
                 Fields: speeddifference
               </para>
               <figure>
-                <title>Untitled</title>
+                <title>Value options dialogue box</title>
                 <mediaobject>
                   <imageobject>
-                    <imagedata fileref="images/Untitled%203.png" />
+                    <imagedata width='80%' fileref="images/Untitled%203.png" />
                   </imageobject>
-                  <textobject><phrase>Untitled</phrase></textobject>
+                  <textobject><phrase>Value options dialogue
+                  box</phrase></textobject>
                 </mediaobject>
               </figure>
+              <para>
+                Value options dialogue box
+              </para>
             </listitem>
           </itemizedlist>
           <para>
@@ -337,14 +340,18 @@ LIMIT 5;
                 Orientation: Horizontal
               </para>
               <figure>
-                <title>Untitled</title>
+                <title>Stat styles dialogue box</title>
                 <mediaobject>
                   <imageobject>
-                    <imagedata fileref="images/Untitled%204.png" />
+                    <imagedata width='80%' fileref="images/Untitled%204.png" />
                   </imageobject>
-                  <textobject><phrase>Untitled</phrase></textobject>
+                  <textobject><phrase>Stat styles dialogue
+                  box</phrase></textobject>
                 </mediaobject>
               </figure>
+              <para>
+                Stat styles dialogue box
+              </para>
             </listitem>
           </itemizedlist>
           <para>
@@ -365,14 +372,18 @@ LIMIT 5;
             </listitem>
           </itemizedlist>
           <figure>
-            <title>Untitled</title>
+            <title>Standard options dialogue box</title>
             <mediaobject>
               <imageobject>
-                <imagedata fileref="images/Untitled%205.png" />
+                <imagedata width='80%' fileref="images/Untitled%205.png" />
               </imageobject>
-              <textobject><phrase>Untitled</phrase></textobject>
+              <textobject><phrase>Standard options dialogue
+              box</phrase></textobject>
             </mediaobject>
           </figure>
+          <para>
+            Standard options dialogue box
+          </para>
           <para>
             <emphasis role="strong">Thresholds:</emphasis>
           </para>
@@ -387,28 +398,36 @@ LIMIT 5;
             </listitem>
           </itemizedlist>
           <figure>
-            <title>Untitled</title>
+            <title>Thresholds dialogue box</title>
             <mediaobject>
               <imageobject>
-                <imagedata fileref="images/Untitled%206.png" />
+                <imagedata width='80%' fileref="images/Untitled%206.png" />
               </imageobject>
-              <textobject><phrase>Untitled</phrase></textobject>
+              <textobject><phrase>Thresholds dialogue
+              box</phrase></textobject>
             </mediaobject>
           </figure>
+          <para>
+            Thresholds dialogue box
+          </para>
         </listitem>
       </orderedlist>
       <para>
         The final visualization will look like the screenshot below.
       </para>
       <figure>
-        <title>Untitled</title>
+        <title>Individual ship speed statistics visualization</title>
         <mediaobject>
           <imageobject>
-            <imagedata fileref="images/Untitled%207.png" />
+            <imagedata width='80%' fileref="images/Untitled%207.png" />
           </imageobject>
-          <textobject><phrase>Untitled</phrase></textobject>
+          <textobject><phrase>Individual ship speed statistics
+          visualization</phrase></textobject>
         </mediaobject>
       </figure>
+      <para>
+        Individual ship speed statistics visualization
+      </para>
     </section>
     <section xml:id="routes-used-most-frequently-visualized-with-a-static-heat-map">
       <title>Routes Used Most Frequently Visualized with a Static Heat
@@ -486,14 +505,18 @@ FROM aisinputfiltered TABLESAMPLE SYSTEM (40)
             </listitem>
           </itemizedlist>
           <figure>
-            <title>Untitled</title>
+            <title>Setting initial view in map view dialogue box</title>
             <mediaobject>
               <imageobject>
-                <imagedata fileref="images/Untitled%208.png" />
+                <imagedata width='80%' fileref="images/Untitled%208.png" />
               </imageobject>
-              <textobject><phrase>Untitled</phrase></textobject>
+              <textobject><phrase>Setting initial view in map view
+              dialogue box</phrase></textobject>
             </mediaobject>
           </figure>
+          <para>
+            Setting initial view in map view dialogue box
+          </para>
           <para>
             <emphasis role="strong">Data Layer:</emphasis>
           </para>
@@ -535,14 +558,19 @@ FROM aisinputfiltered TABLESAMPLE SYSTEM (40)
             </listitem>
           </itemizedlist>
           <figure>
-            <title>Untitled</title>
+            <title>Setting up heat-map in data layer dialogue
+            box</title>
             <mediaobject>
               <imageobject>
-                <imagedata fileref="images/Untitled%209.png" />
+                <imagedata width='80%' fileref="images/Untitled%209.png" />
               </imageobject>
-              <textobject><phrase>Untitled</phrase></textobject>
+              <textobject><phrase>Setting up heat-map in data layer
+              dialogue box</phrase></textobject>
             </mediaobject>
           </figure>
+          <para>
+            Setting up heat-map in data layer dialogue box
+          </para>
           <para>
             <emphasis role="strong">Standard Options:</emphasis>
           </para>
@@ -554,14 +582,19 @@ FROM aisinputfiltered TABLESAMPLE SYSTEM (40)
             </listitem>
           </itemizedlist>
           <figure>
-            <title>Untitled</title>
+            <title>Choosing color scheme in standard options dialogue
+            box</title>
             <mediaobject>
               <imageobject>
-                <imagedata fileref="images/Untitled%2010.png" />
+                <imagedata width='80%' fileref="images/Untitled%2010.png" />
               </imageobject>
-              <textobject><phrase>Untitled</phrase></textobject>
+              <textobject><phrase>Choosing color scheme in standard
+              options dialogue box</phrase></textobject>
             </mediaobject>
           </figure>
+          <para>
+            Choosing color scheme in standard options dialogue box
+          </para>
         </listitem>
       </orderedlist>
       <para>
@@ -571,14 +604,18 @@ FROM aisinputfiltered TABLESAMPLE SYSTEM (40)
         query.
       </para>
       <figure>
-        <title>Untitled</title>
+        <title>Route usage frequency heat-map visualization</title>
         <mediaobject>
           <imageobject>
-            <imagedata fileref="images/Untitled%2011.png" />
+            <imagedata width='80%' fileref="images/Untitled%2011.png" />
           </imageobject>
-          <textobject><phrase>Untitled</phrase></textobject>
+          <textobject><phrase>Route usage frequency heat-map
+          visualization</phrase></textobject>
         </mediaobject>
       </figure>
+      <para>
+        Route usage frequency heat-map visualization
+      </para>
     </section>
     <section xml:id="number-of-boats-moving-through-a-given-area">
       <title>Number of Boats Moving Through a Given Area</title>
@@ -687,14 +724,19 @@ GROUP BY P.port_name, P.lat, P.lng
         ships in regions and ports.
       </para>
       <figure>
-        <title>Untitled</title>
+        <title>Frequency intersecting with geometric envelop
+        visualization</title>
         <mediaobject>
           <imageobject>
-            <imagedata fileref="images/Untitled%2012.png" />
+            <imagedata width='80%' fileref="images/Untitled%2012.png" />
           </imageobject>
-          <textobject><phrase>Untitled</phrase></textobject>
+          <textobject><phrase>Frequency intersecting with geometric
+          envelop visualization</phrase></textobject>
         </mediaobject>
       </figure>
+      <para>
+        Frequency intersecting with geometric envelop visualization
+      </para>
     </section>
     <section xml:id="boats-in-close-proximity-in-a-given-time-range">
       <title>Boats in Close Proximity in a Given Time Range</title>
@@ -826,26 +868,34 @@ FROM TimeClosestShips t;
         </listitem>
       </itemizedlist>
       <figure>
-        <title>Untitled</title>
+        <title>Multiple layers in data layers dialogue box</title>
         <mediaobject>
           <imageobject>
-            <imagedata fileref="images/Untitled%2013.png" />
+            <imagedata width='80%' fileref="images/Untitled%2013.png" />
           </imageobject>
-          <textobject><phrase>Untitled</phrase></textobject>
+          <textobject><phrase>Multiple layers in data layers dialogue
+          box</phrase></textobject>
         </mediaobject>
       </figure>
+      <para>
+        Multiple layers in data layers dialogue box
+      </para>
       <para>
         The final visualization looks like the below.
       </para>
       <figure>
-        <title>Untitled</title>
+        <title>Visualization of ships within 300m using heat-map</title>
         <mediaobject>
           <imageobject>
-            <imagedata fileref="images/Untitled%2014.png" />
+            <imagedata width='80%' fileref="images/Untitled%2014.png" />
           </imageobject>
-          <textobject><phrase>Untitled</phrase></textobject>
+          <textobject><phrase>Visualization of ships within 300m using
+          heat-map</phrase></textobject>
         </mediaobject>
       </figure>
+      <para>
+        Visualization of ships within 300m using heat-map
+      </para>
       <para>
         It’s helpful to include the tooltip for layers to allow users to
         see the data behind the visualization, which helps in
@@ -864,24 +914,19 @@ FROM TimeClosestShips t;
         ST_MakeEnvelope, as seen in the previous queries.
       </para>
       <figure>
-        <title>The cluster of ships in the middle of this harbour all
-        represent the same ship that was found to have a closest
-        distance to other ships at various times while in the
-        port.</title>
+        <title>Multiple results for the same ship at various times while
+        in a port</title>
         <mediaobject>
           <imageobject>
-            <imagedata fileref="images/Untitled%2015.png" />
+            <imagedata width='80%' fileref="images/Untitled%2015.png" />
           </imageobject>
-          <textobject><phrase>The cluster of ships in the middle of this
-          harbour all represent the same ship that was found to have a
-          closest distance to other ships at various times while in the
-          port.</phrase></textobject>
+          <textobject><phrase>Multiple results for the same ship at
+          various times while in a port</phrase></textobject>
         </mediaobject>
       </figure>
       <para>
-        The cluster of ships in the middle of this harbour all represent
-        the same ship that was found to have a closest distance to other
-        ships at various times while in the port.
+        Multiple results for the same ship at various times while in a
+        port
       </para>
     </section>
   </section>
@@ -903,14 +948,18 @@ FROM TimeClosestShips t;
           top-slightly-right of the window.
         </para>
         <figure>
-          <title>Untitled</title>
+          <title>Dashboard settings gear box</title>
           <mediaobject>
             <imageobject>
-              <imagedata fileref="images/Untitled%2016.png" />
+              <imagedata width='80%' fileref="images/Untitled%2016.png" />
             </imageobject>
-            <textobject><phrase>Untitled</phrase></textobject>
+            <textobject><phrase>Dashboard settings gear
+            box</phrase></textobject>
           </mediaobject>
         </figure>
+        <para>
+          Dashboard settings gear box
+        </para>
       </listitem>
       <listitem>
         <para>
@@ -918,14 +967,18 @@ FROM TimeClosestShips t;
           the top-left side of the screen.
         </para>
         <figure>
-          <title>Untitled</title>
+          <title>Selecting Variables in dashboard settings</title>
           <mediaobject>
             <imageobject>
-              <imagedata fileref="images/Untitled%2017.png" />
+              <imagedata width='80%' fileref="images/Untitled%2017.png" />
             </imageobject>
-            <textobject><phrase>Untitled</phrase></textobject>
+            <textobject><phrase>Selecting Variables in dashboard
+            settings</phrase></textobject>
           </mediaobject>
         </figure>
+        <para>
+          Selecting Variables in dashboard settings
+        </para>
       </listitem>
       <listitem>
         <para>
@@ -969,14 +1022,18 @@ FROM TimeClosestShips t;
           format that MobilityDB will accept.
         </para>
         <figure>
-          <title>Untitled</title>
+          <title>Creating user-defined list of custom variables</title>
           <mediaobject>
             <imageobject>
-              <imagedata fileref="images/Untitled%2018.png" />
+              <imagedata width='80%' fileref="images/Untitled%2018.png" />
             </imageobject>
-            <textobject><phrase>Untitled</phrase></textobject>
+            <textobject><phrase>Creating user-defined list of custom
+            variables</phrase></textobject>
           </mediaobject>
         </figure>
+        <para>
+          Creating user-defined list of custom variables
+        </para>
       </listitem>
       <listitem>
         <para>
@@ -1051,14 +1108,19 @@ GROUP BY P.port_name, P.lat, P.lng
         look at the entire days data it is colored red.
       </para>
       <figure>
-        <title>Untitled</title>
+        <title>Visualization of geometry intersection using dynamic
+        variables</title>
         <mediaobject>
           <imageobject>
-            <imagedata fileref="images/Untitled%2019.png" />
+            <imagedata width='80%' fileref="images/Untitled%2019.png" />
           </imageobject>
-          <textobject><phrase>Untitled</phrase></textobject>
+          <textobject><phrase>Visualization of geometry intersection
+          using dynamic variables</phrase></textobject>
         </mediaobject>
       </figure>
+      <para>
+        Visualization of geometry intersection using dynamic variables
+      </para>
     </section>
     <section xml:id="global-variables">
       <title>Global Variables</title>
@@ -1073,14 +1135,18 @@ GROUP BY P.port_name, P.lat, P.lng
         dashboard.
       </para>
       <figure>
-        <title>Untitled</title>
+        <title>Assigning time range using global variables</title>
         <mediaobject>
           <imageobject>
-            <imagedata fileref="images/Untitled%2020.png" />
+            <imagedata width='80%' fileref="images/Untitled%2020.png" />
           </imageobject>
-          <textobject><phrase>Untitled</phrase></textobject>
+          <textobject><phrase>Assigning time range using global
+          variables</phrase></textobject>
         </mediaobject>
       </figure>
+      <para>
+        Assigning time range using global variables
+      </para>
       <para>
         <emphasis>Note: It is important to be aware of the timezone used
         for the underlying data relative the the queries for global
@@ -1089,86 +1155,6 @@ GROUP BY P.port_name, P.lat, P.lng
         example, we change the time zone to UTC to match our
         dataset.</emphasis>
       </para>
-    </section>
-  </section>
-  <section xml:id="todo-is-below-here">
-    <title>TODO IS BELOW HERE</title>
-    <section xml:id="how-many-ships-are-active-during-each-hour-of-the-day">
-      <title>How many ships are active during each hour of the
-      day?</title>
-      <para>
-        @Ismail
-      </para>
-    </section>
-    <section xml:id="where-are-the-ships-with-cargo-x-moving">
-      <title>Where are the ships with cargo X moving?</title>
-      <programlisting language="sql">
-CREATE TABLE AISInputFilteredPlus AS
-SELECT DISTINCT ON(MMSI, TypeOfMobile, T) *
-FROM AISInput
-WHERE Longitude BETWEEN -16.1 and 32.88 AND Latitude BETWEEN 40.18 AND 84.17;
-
-SELECT
-  latitude,
-  longitude,
-  typeofmobile,
-    mmsi
-FROM aisinputfiltered TABLESAMPLE SYSTEM (10)
-
-SELECT DISTINCT(TypeOfMobile) FROM AISInputFilteredPlus;
-
-SELECT COUNT(TypeOfMobile) FROM AISInput GROUP BY TypeOfMobile;
-</programlisting>
-    </section>
-    <section xml:id="how-many-total-ships">
-      <title>How many total ships…?</title>
-      <para>
-        @Adam Broniewski
-      </para>
-      <itemizedlist>
-        <listitem>
-          <para>
-            Are included in the dataset?
-          </para>
-          <programlisting language="sql">
-SELECT
-  COUNT(*) DISTINCT
-FROM ships
-</programlisting>
-        </listitem>
-        <listitem>
-          <para>
-            in some period of time?
-          </para>
-        </listitem>
-        <listitem>
-          <para>
-            are there with a certain type of cargo?
-          </para>
-          <programlisting language="sql">
-SELECT
-  COUNT(*) AS Frequency, Destination AS Destination
-FROM aisinput
-GROUP BY Destination
-ORDER BY Frequency desc;
-</programlisting>
-        </listitem>
-        <listitem>
-        </listitem>
-      </itemizedlist>
-    </section>
-    <section xml:id="how-many-kms-of-travel-was-there-in-some-period-of-time">
-      <title>How many KMs of travel was there in some period of
-      time?</title>
-      <figure>
-        <title>Untitled</title>
-        <mediaobject>
-          <imageobject>
-            <imagedata fileref="images/Untitled%2021.png" />
-          </imageobject>
-          <textobject><phrase>Untitled</phrase></textobject>
-        </mediaobject>
-      </figure>
     </section>
   </section>
 </chapter>
