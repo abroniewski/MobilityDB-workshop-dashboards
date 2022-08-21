@@ -1,0 +1,20 @@
+Export from notion to Markdown
+Change folder to "images"
+
+IN MARKDOWN
+Find and replace image folder name in markdown with "images"
+
+IN TERMINAL
+pandoc AIS_Dashboard.md -f markdown -t docbook5 -s -o AIS_Dashboard.xml
+
+IN XML
+Delete header information for article
+Insert <chapter id ="AIS_Dashboard"> at beginning
+Insert </chapter> at end
+Find/replace "href" links with "<ulink url"
+Find replace "end link" with "</ulink>"
+
+TODO: Add doc title
+TODO: Change image width
+TODO: Add image captions
+TODO: change image filename
