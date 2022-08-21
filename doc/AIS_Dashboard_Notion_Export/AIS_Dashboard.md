@@ -1,5 +1,3 @@
-# Dashboard and Visualization of Ship Trajectories (AIS)
-
 This module builds on the Managing Ship Trajectories (AIS) module by creating a business intelligence dashboard to visualize and manipulate data. The module shows how to setup a Grafana dashboard with an existing database, create basic visualizations, set properties for different outputs, and use Variables to create dynamic visuals.
 
 # Contents
@@ -15,11 +13,10 @@ The module covers the following topics:
 
 # Tools
 
-The tools used in this module are as follows:  (todo Add version of these softwares)
+The tools used in this module are as follows:
 
 - MobilityDB, on top of PostgreSQL and PostGIS
-- QGIS
-- Grafana
+- Grafana (version 9.0.7)
 
 # Setting up Postgres Database
 
@@ -63,6 +60,9 @@ Start by setting up Grafana on your system:
     ```
     
 3. [Windows](https://grafana.com/docs/grafana/latest/setup-grafana/installation/windows/)
+    
+    Use the windows installer available at the Grafana website.
+    
 
 # Sign in and Connect to Data Source
 
@@ -108,13 +108,17 @@ Let’s visualize the speed of the ships using the previously build query. Here 
     
 5. We can also quickly do some datatype transformations to help Grafana correctly interpret the incoming data. Next to the Query button, select “Transform”, add “Convert field type” and choose *mmsi* as *String.*
     
-    ![Untitled](images/Untitled%201.png)
+    ![Datatype transformations in Grafana](images/Untitled%201.png)
+    
+    Datatype transformations in Grafana
     
 6. We will modify some of the visualization options in the panel on the right. 
     
     First, choose *stat* as the visualization
     
-    ![Untitled](images/Untitled%202.png)
+    ![Choosing visualization type](images/Untitled%202.png)
+    
+    Choosing visualization type
     
     **Panel Options:** Give the panel the title *Incorrect AIS Boat Speed Reporting*
     
@@ -123,7 +127,9 @@ Let’s visualize the speed of the ships using the previously build query. Here 
     - Show: All values
     - Fields: speeddifference
         
-        ![Untitled](images/Untitled%203.png)
+        ![Value options dialogue box](images/Untitled%203.png)
+        
+        Value options dialogue box
         
     
     *Note: we can include a limit here instead of in our SQL query as well.*
@@ -132,7 +138,9 @@ Let’s visualize the speed of the ships using the previously build query. Here 
     
     - Orientation: Horizontal
         
-        ![Untitled](images/Untitled%204.png)
+        ![Stat styles dialogue box](images/Untitled%204.png)
+        
+        Stat styles dialogue box
         
     
     **Standard Options:**
@@ -140,18 +148,24 @@ Let’s visualize the speed of the ships using the previously build query. Here 
     - Unit:  Velocity → meter/second (m/s). *Note: you can scroll in the drop down menu to see all options.*
     - Color scheme: Green-Yellow-Red (by value)
     
-    ![Untitled](images/Untitled%205.png)
+    ![Standard options dialogue box](images/Untitled%205.png)
+    
+    Standard options dialogue box
     
     **Thresholds:** 
     
     - remove the existing threshold by clicking the little trash can icon on the right. Adding a threshold will force the visualization to color the data a specific color if the threshold is met.
     
-    ![Untitled](images/Untitled%206.png)
+    ![Thresholds dialogue box](images/Untitled%206.png)
+    
+    Thresholds dialogue box
     
 
 The final visualization will look like the screenshot below. 
 
-![Untitled](images/Untitled%207.png)
+![Individual ship speed statistics visualization](images/Untitled%207.png)
+
+Individual ship speed statistics visualization
 
 ## Routes Used Most Frequently Visualized with a Static Heat Map
 
@@ -181,7 +195,9 @@ We can visualize the routes used by ships with a heat map generated from individ
     - Use current map setting (this will use the current zoom and positioning level as default)
     - Share View: enable (this will sync up the movement and zoom across multiple maps on the same dashboard)
     
-    ![Untitled](images/Untitled%208.png)
+    ![Setting initial view in map view dialogue box](images/Untitled%208.png)
+    
+    Setting initial view in map view dialogue box
     
     **Data Layer:**
     
@@ -193,18 +209,24 @@ We can visualize the routes used by ships with a heat map generated from individ
     - Radius: 1
     - Blur: 5
     
-    ![Untitled](images/Untitled%209.png)
+    ![Setting up heat-map in data layer dialogue box](images/Untitled%209.png)
+    
+    Setting up heat-map in data layer dialogue box
     
     **Standard Options:**
     
     - Color scheme: Blue-Yellow-Red (by value).
     
-    ![Untitled](images/Untitled%2010.png)
+    ![Choosing color scheme in standard options dialogue box](images/Untitled%2010.png)
+    
+    Choosing color scheme in standard options dialogue box
     
 
 The final visualization will look like the screenshot below. Note: The number of datapoints rendered can be manipulated by changing the parameter of the TABLESAMPLE SYSTEM() call in the query.
 
-![Untitled](images/Untitled%2011.png)
+![Route usage frequency heat-map visualization](images/Untitled%2011.png)
+
+Route usage frequency heat-map visualization
 
 ## Number of Boats Moving Through a Given Area
 
@@ -255,7 +277,9 @@ The final visualization will look like the screenshot below. Note: The number of
 
 In the visualization below we can see port Rodby has a higher number of ships coming and going to it and that’s why it is colored red. This visualization can show relative activity of ships in regions and ports. 
 
-![Untitled](images/Untitled%2012.png)
+![Frequency intersecting with geometric envelop visualization](images/Untitled%2012.png)
+
+Frequency intersecting with geometric envelop visualization
 
 ## Boats in Close Proximity in a Given Time Range
 
@@ -327,19 +351,23 @@ Click on “+ Add layer” to add another layer to the data, this time using b2_
 - Value: 1
 - Color: select different color for each boat.
 
-![Untitled](images/Untitled%2013.png)
+![Multiple layers in data layers dialogue box](images/Untitled%2013.png)
+
+Multiple layers in data layers dialogue box
 
 The final visualization looks like the below. 
 
-![Untitled](images/Untitled%2014.png)
+![Visualization of ships within 300m using heat-map](images/Untitled%2014.png)
+
+Visualization of ships within 300m using heat-map
 
 It’s helpful to include the tooltip for layers to allow users to see the data behind the visualization, which helps in interpretation and is a good way for subject matter experts to provide concrete feedback. Using the tooltip, we can quickly see that the same ship can be within 300m to multiple other ships in the same time frame (as seen in the screenshot below). This can result in a higher frequency of results in a heat map view than expected. SQL queries should be modified to ensure they are correctly interpreted. 
 
 Not surprisingly, we see there are lots of results for proximity within ports. We could avoid including results in ports by excluding all results that occur within envelopes defined by ST_MakeEnvelope, as seen in the previous queries. 
 
-![The cluster of ships in the middle of this harbour all represent the same ship that was found to have a closest distance to other ships at various times while in the port.](images/Untitled%2015.png)
+![Multiple results for the same ship at various times while in a port](images/Untitled%2015.png)
 
-The cluster of ships in the middle of this harbour all represent the same ship that was found to have a closest distance to other ships at various times while in the port.
+Multiple results for the same ship at various times while in a port
 
 # Dynamic Dashboards - Creating Variables
 
@@ -347,11 +375,15 @@ We can use variables in Grafana to manipulate time-ranges that are used as input
 
 1. In the dashboard window, click “Dashboard settings” icon; the gear symbol, on the top-slightly-right of the window.
     
-    ![Untitled](images/Untitled%2016.png)
+    ![Dashboard settings gear box](images/Untitled%2016.png)
+    
+    Dashboard settings gear box
     
 2. Click on the “Variables” in the next window on the top-left side of the screen.
     
-    ![Untitled](images/Untitled%2017.png)
+    ![Selecting Variables in dashboard settings ](images/Untitled%2017.png)
+    
+    Selecting Variables in dashboard settings 
     
 3. You’ll see a screen that explains the variables in Grafana and also points to the [Templates and variables documentation](https://grafana.com/docs/grafana/latest/variables/). Click on the “Add variable” button.
 4.  In “General”
@@ -360,10 +392,11 @@ We can use variables in Grafana to manipulate time-ranges that are used as input
 5. In “Custom options” we will manually add all the time ranges with 1 hour increment. e.g. “2018-01-04 00:00:00, 2018-01-04 01:00:00 … 2018-01-04 23:00:00”
 6. You get a screen like below. Towards the bottom there is also a “Preview of values” that shows what what the drop-down options will look like for the variable you created. In this case, we are creating the timestamps in the same format that MobilityDB will accept.
     
-    ![Untitled](images/Untitled%2018.png)
+    ![Creating user-defined list of custom variables](images/Untitled%2018.png)
     
-
-1. We can create another variable called “ToTime” with values shifted 1 hour. So the starting value would be “2018-01-04 01:00:00” and the final value will be “2018-01-05 00:00:00”.
+    Creating user-defined list of custom variables
+    
+7. We can create another variable called “ToTime” with values shifted 1 hour. So the starting value would be “2018-01-04 01:00:00” and the final value will be “2018-01-05 00:00:00”.
 
 Now we can modify some of the queries by including the newly created variables which will return results from a specific time window. We have now provided a user with the ability to dynamically modify visualization queries and slice through time. 
 
@@ -412,69 +445,16 @@ GROUP BY P.port_name, P.lat, P.lng
 
 We can select the start time, “FromTime” → “2018-01-04 02:00:00” & “ToTime” → “2018-01-04 06:00:00” . As we can see below, the port Rodby has less activity during this period and that’s why it is green now. But overall Rodby has more activity so when we look at the entire days data it is colored red.
 
-![Untitled](images/Untitled%2019.png)
+![Visualization of geometry intersection using dynamic variables](images/Untitled%2019.png)
+
+Visualization of geometry intersection using dynamic variables
 
 ## Global Variables
 
 Grafana also has some [built-in variables (global variables)](https://grafana.com/docs/grafana/latest/variables/variable-types/global-variables/) that can be used to accomplish the same thing we did with custom variables. We can use the global variables $__from and $__to instead of the $FromTime and $ToTime we created. The time range can then be modified with the time range options in the top right of the dashboard.
 
-![Untitled](images/Untitled%2020.png)
+![Assigning time range using global variables](images/Untitled%2020.png)
+
+Assigning time range using global variables
 
 *Note: It is important to be aware of the timezone used for the underlying data relative the the queries for global variables. Time zones can be adjusted at the bottom of the time range selection, “Change time settings”. For this example, we change the time zone to UTC to match our dataset.*
-
----
-
-# TODO IS BELOW HERE
-
-## How many ships are active during each hour of the day?
-
-@Ismail 
-
-## Where are the ships with cargo X moving?
-
-```sql
-CREATE TABLE AISInputFilteredPlus AS
-SELECT DISTINCT ON(MMSI, TypeOfMobile, T) *
-FROM AISInput
-WHERE Longitude BETWEEN -16.1 and 32.88 AND Latitude BETWEEN 40.18 AND 84.17;
-
-SELECT
-  latitude,
-  longitude,
-  typeofmobile,
-	mmsi
-FROM aisinputfiltered TABLESAMPLE SYSTEM (10)
-
-SELECT DISTINCT(TypeOfMobile) FROM AISInputFilteredPlus;
-
-SELECT COUNT(TypeOfMobile) FROM AISInput GROUP BY TypeOfMobile;
-```
-
-## How many total ships…?
-
-@Adam Broniewski 
-
-- Are included in the dataset?
-    
-    ```sql
-    SELECT
-      COUNT(*) DISTINCT
-    FROM ships
-    ```
-    
-- in some period of time?
-- are there with a certain type of cargo?
-    
-    ```sql
-    SELECT
-      COUNT(*) AS Frequency, Destination AS Destination
-    FROM aisinput
-    GROUP BY Destination
-    ORDER BY Frequency desc;
-    ```
-    
-- 
-
-## How many KMs of travel was there in some period of time?
-
-![Untitled](images/Untitled%2021.png)
