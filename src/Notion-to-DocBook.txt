@@ -2,19 +2,32 @@ Export from notion to Markdown
 Change folder to "images"
 
 IN MARKDOWN
-Find and replace image folder name in markdown with "images"
+Find and replace image folder
+    "(Dashboard%20and%20Visualization%20of%20Ship%20Trajectories%20(%20845afa91ff30470181ea3a0b5ddf08b5/"
+    with "(images/"
+Remove initial heading
+Remove all caption duplicate text
 
 IN TERMINAL
+cd [folder with markdown]
 pandoc AIS_Dashboard.md -f markdown -t docbook5 -s -o AIS_Dashboard.xml
 
 IN XML
-Delete header information for article
+Delete header information "<article ... </info>"
 Insert <chapter id ="AIS_Dashboard"> at beginning
+Insert <title></title>
+Remove </article> at end
 Insert </chapter> at end
-Find/replace "href" links with "<ulink url"
-Find replace "end link" with "</ulink>"
+Find/replace "<link xlink:href"
+    with "<ulink url"
+Find/replace "</link>"
+    with "</ulink>"
+Find/replace "<imagedata fileref"
+    with "<imagedata width='80%' fileref"
+    note: some pictures will need to have their width set manually.
 
-TODO: Add doc title
-TODO: Change image width
-TODO: Add image captions
+IN TERMINAL
+cd ..
+dblatex -s texstyle.sty -T native -t pdf -o mobilitydb-workshop.pdf mobilitydb-workshop.xml
+
 TODO: change image filename
