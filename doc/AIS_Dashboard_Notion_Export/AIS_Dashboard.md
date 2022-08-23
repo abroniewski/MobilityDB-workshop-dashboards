@@ -18,15 +18,13 @@ The tools used in this module are as follows:
 - MobilityDB, on top of PostgreSQL and PostGIS
 - Grafana (version 9.0.7)
 
-# Setting up Postgres Database
+# Setting up the Data Source
 
-Follow section 1.1 to 1.6 of the AIS workshop to setup a Postgres database with the AIS data that will be used for visualization.
+Data for the workshop is loaded into a MobilityDB database hosted on Azure, with all login information provided in the [Sign-in and Connect to Data Source] section below.
 
-**or**
+The raw data in CSV format is also available on the [MobilityDB-workshop repository](https://github.com/MobilityDB/MobilityDB-workshop/blob/master/data/ais_data.zip).
 
-Connect to Azure server to access prepared data. (Instructions
-
-# Setting up Visualization Dashboard
+# Setting up the Visualization Dashboard
 
 We can use [Grafana](https://grafana.com/), an open-source technology, to create a business intelligence dashboard. This will allow different users to setup their own queries and visualizations, or easily slice through data in a visual way for non-technical users.
 
@@ -68,7 +66,7 @@ Start by setting up Grafana on your system:
 
 We can now sign in to Grafana by going to [http://localhost:3000/](http://localhost:3000/). Setup a new account if needed. Additional instructions to login can be found here following the [build your first dashboard instructions.](https://grafana.com/docs/grafana/latest/getting-started/build-first-dashboard/)
 
-Next, we **add a data source** for Grafana to interact with. In this case, we can follow the [Grafana instructions for adding a data source](https://grafana.com/docs/grafana/latest/datasources/add-a-data-source/) and search for [Postgre](https://grafana.com/docs/grafana/latest/datasources/postgres/)SQL as the data source.
+Next, we **add a data source** for Grafana to interact with. In this case, we can follow the [Grafana instructions for adding a data source](https://grafana.com/docs/grafana/latest/datasources/add-a-data-source/) and search for [PostgreSQL](https://grafana.com/docs/grafana/latest/datasources/postgres/) as the data source.
 
 The workshop is using the following settings to connect to the postgres server on Azure.
 
@@ -82,9 +80,7 @@ The workshop is using the following settings to connect to the postgres server o
 
 Then press save and test.
 
-![DataSource Settings](images/Untitled.png)
-
-DataSource Settings
+![Data Source settings](images/DataSourceSettings.png)
 
 # Creating a Dashboard
 
@@ -108,17 +104,13 @@ Let’s visualize the speed of the ships using the previously build query. Here 
     
 5. We can also quickly do some datatype transformations to help Grafana correctly interpret the incoming data. Next to the Query button, select “Transform”, add “Convert field type” and choose *mmsi* as *String.*
     
-    ![Datatype transformations in Grafana](images/Untitled%201.png)
-    
-    Datatype transformations in Grafana
+    ![Datatype transformations in Grafana](images/DatatypeTransformationsInGrafana.png)
     
 6. We will modify some of the visualization options in the panel on the right. 
     
     First, choose *stat* as the visualization
     
-    ![Choosing visualization type](images/Untitled%202.png)
-    
-    Choosing visualization type
+    ![Choosing visualization type](images/ChoosingVisualizationType.png)
     
     **Panel Options:** Give the panel the title *Incorrect AIS Boat Speed Reporting*
     
@@ -127,10 +119,7 @@ Let’s visualize the speed of the ships using the previously build query. Here 
     - Show: All values
     - Fields: speeddifference
         
-        ![Value options dialogue box](images/Untitled%203.png)
-        
-        Value options dialogue box
-        
+        ![Value options dialogue box](images/ValueOptionsDialogueBox.png)
     
     *Note: we can include a limit here instead of in our SQL query as well.*
     
@@ -138,9 +127,7 @@ Let’s visualize the speed of the ships using the previously build query. Here 
     
     - Orientation: Horizontal
         
-        ![Stat styles dialogue box](images/Untitled%204.png)
-        
-        Stat styles dialogue box
+        ![Stat styles dialogue box](images/StatStylesDialogueBox.png)
         
     
     **Standard Options:**
@@ -148,24 +135,18 @@ Let’s visualize the speed of the ships using the previously build query. Here 
     - Unit:  Velocity → meter/second (m/s). *Note: you can scroll in the drop down menu to see all options.*
     - Color scheme: Green-Yellow-Red (by value)
     
-    ![Standard options dialogue box](images/Untitled%205.png)
-    
-    Standard options dialogue box
+    ![Standard options dialogue box](images/StandardOptionsDialogueBox.png)
     
     **Thresholds:** 
     
     - remove the existing threshold by clicking the little trash can icon on the right. Adding a threshold will force the visualization to color the data a specific color if the threshold is met.
     
-    ![Thresholds dialogue box](images/Untitled%206.png)
-    
-    Thresholds dialogue box
+    ![Thresholds dialogue box](images/ThresholdsDialogueBox.png)
     
 
 The final visualization will look like the screenshot below. 
 
-![Individual ship speed statistics visualization](images/Untitled%207.png)
-
-Individual ship speed statistics visualization
+![Individual ship speed statistics visualization](images/IndividualShipSpeedStatisticsVisualization.png)
 
 ## Routes Used Most Frequently Visualized with a Static Heat Map
 
@@ -183,7 +164,7 @@ We can visualize the routes used by ships with a heat map generated from individ
     FROM aisinputfiltered TABLESAMPLE SYSTEM (40)
     ```
     
-3. Change the visualization type to *Geomap*. 
+3. Change the visualization type to *Geomap*.
 4. On the map, zoom in to fit the data points into the frame and modify the following visualization options:
     
     **Panel Options:**
@@ -195,9 +176,7 @@ We can visualize the routes used by ships with a heat map generated from individ
     - Use current map setting (this will use the current zoom and positioning level as default)
     - Share View: enable (this will sync up the movement and zoom across multiple maps on the same dashboard)
     
-    ![Setting initial view in map view dialogue box](images/Untitled%208.png)
-    
-    Setting initial view in map view dialogue box
+    ![Setting initial view in map view dialogue box](images/SettingInitialViewInMapViewDialogueBox.png)
     
     **Data Layer:**
     
@@ -209,24 +188,18 @@ We can visualize the routes used by ships with a heat map generated from individ
     - Radius: 1
     - Blur: 5
     
-    ![Setting up heat-map in data layer dialogue box](images/Untitled%209.png)
-    
-    Setting up heat-map in data layer dialogue box
+    ![Setting up heat-map in data layer dialogue box](images/SettingUpHeatMapInDataLayerDialogueBox.png)
     
     **Standard Options:**
     
     - Color scheme: Blue-Yellow-Red (by value).
     
-    ![Choosing color scheme in standard options dialogue box](images/Untitled%2010.png)
-    
-    Choosing color scheme in standard options dialogue box
+    ![Choosing color scheme in standard options dialogue box](images/ChoosingColorSchemeInStandardOptionsDialogueBox.png)
     
 
 The final visualization will look like the screenshot below. Note: The number of datapoints rendered can be manipulated by changing the parameter of the TABLESAMPLE SYSTEM() call in the query.
 
-![Route usage frequency heat-map visualization](images/Untitled%2011.png)
-
-Route usage frequency heat-map visualization
+![Route usage frequency heat-map visualization](images/RouteUsageFrequencyHeatMapVisualization.png)
 
 ## Number of Boats Moving Through a Given Area
 
@@ -258,7 +231,7 @@ Route usage frequency heat-map visualization
     
     *Note: You will see queries are build using the WITH statement (common table expressions - CTE). This helps to break the query down into parts, and also helps make it easier to understand by others.*
     
-4. The options should be as follows:
+4. The options (visualization settings - on the right side of the screen) should be as follows:
     
     **Data Layer**
     
@@ -277,9 +250,7 @@ Route usage frequency heat-map visualization
 
 In the visualization below we can see port Rodby has a higher number of ships coming and going to it and that’s why it is colored red. This visualization can show relative activity of ships in regions and ports. 
 
-![Frequency intersecting with geometric envelop visualization](images/Untitled%2012.png)
-
-Frequency intersecting with geometric envelop visualization
+![Frequency intersecting with geometric envelop visualization](images/FrequencyIntersectingWithGeometricEnvelopVisualization.png)
 
 ## Boats in Close Proximity in a Given Time Range
 
@@ -344,30 +315,24 @@ To add the points to the map modify the following options:
 - Radius: 5
 - Blur: 15
 
-Click on “+ Add layer” to add another layer to the data, this time using b2_lat and b2_long as the coordinates. We can also add a layer to show the precise locations with markers for both ships. For the Boat 1 and Boat 2 Locations, we use the following options:
+Click on “+ Add layer” to add another heat map layer to the data, this time using b2_lat and b2_long as the coordinates. We can also add a layer to show the precise locations with markers for both ships (using b1_lat, b1_lng, b2_lat and b2_long), setting each marker to a different color. For the Boat 1 and Boat 2 Locations, we use the following options:
 
 **Data Layer:**
 
 - Value: 1
 - Color: select different color for each boat.
 
-![Multiple layers in data layers dialogue box](images/Untitled%2013.png)
-
-Multiple layers in data layers dialogue box
+![Multiple layers in data layers dialogue box](images/MultipleLayersInDataLayersDialogueBox.png)
 
 The final visualization looks like the below. 
 
-![Visualization of ships within 300m using heat-map](images/Untitled%2014.png)
-
-Visualization of ships within 300m using heat-map
+![Visualization of ships within 300m using heat-map](images/VisualizationOfShipsWithin300mUsingHeatMap.png)
 
 It’s helpful to include the tooltip for layers to allow users to see the data behind the visualization, which helps in interpretation and is a good way for subject matter experts to provide concrete feedback. Using the tooltip, we can quickly see that the same ship can be within 300m to multiple other ships in the same time frame (as seen in the screenshot below). This can result in a higher frequency of results in a heat map view than expected. SQL queries should be modified to ensure they are correctly interpreted. 
 
 Not surprisingly, we see there are lots of results for proximity within ports. We could avoid including results in ports by excluding all results that occur within envelopes defined by ST_MakeEnvelope, as seen in the previous queries. 
 
-![Multiple results for the same ship at various times while in a port](images/Untitled%2015.png)
-
-Multiple results for the same ship at various times while in a port
+![Multiple results for the same ship at various times while in a port](images/MultipleResultsForTheSameShipAtVariousTimesWhileInAPort.png)
 
 # Dynamic Dashboards - Creating Variables
 
@@ -375,15 +340,11 @@ We can use variables in Grafana to manipulate time-ranges that are used as input
 
 1. In the dashboard window, click “Dashboard settings” icon; the gear symbol, on the top-slightly-right of the window.
     
-    ![Dashboard settings gear box](images/Untitled%2016.png)
-    
-    Dashboard settings gear box
+    ![Dashboard settings gear box](images/DashboardSettingsGearBox.png)
     
 2. Click on the “Variables” in the next window on the top-left side of the screen.
     
-    ![Selecting Variables in dashboard settings ](images/Untitled%2017.png)
-    
-    Selecting Variables in dashboard settings 
+    ![Selecting Variables in dashboard settings](images/SelectingVariablesInDashboardSettings.png)
     
 3. You’ll see a screen that explains the variables in Grafana and also points to the [Templates and variables documentation](https://grafana.com/docs/grafana/latest/variables/). Click on the “Add variable” button.
 4.  In “General”
@@ -392,9 +353,7 @@ We can use variables in Grafana to manipulate time-ranges that are used as input
 5. In “Custom options” we will manually add all the time ranges with 1 hour increment. e.g. “2018-01-04 00:00:00, 2018-01-04 01:00:00 … 2018-01-04 23:00:00”
 6. You get a screen like below. Towards the bottom there is also a “Preview of values” that shows what what the drop-down options will look like for the variable you created. In this case, we are creating the timestamps in the same format that MobilityDB will accept.
     
-    ![Creating user-defined list of custom variables](images/Untitled%2018.png)
-    
-    Creating user-defined list of custom variables
+    ![Creating user-defined list of custom variables](images/CreatingUserDefinedListOfCustomVariables.png)
     
 7. We can create another variable called “ToTime” with values shifted 1 hour. So the starting value would be “2018-01-04 01:00:00” and the final value will be “2018-01-05 00:00:00”.
 
@@ -445,16 +404,18 @@ GROUP BY P.port_name, P.lat, P.lng
 
 We can select the start time, “FromTime” → “2018-01-04 02:00:00” & “ToTime” → “2018-01-04 06:00:00” . As we can see below, the port Rodby has less activity during this period and that’s why it is green now. But overall Rodby has more activity so when we look at the entire days data it is colored red.
 
-![Visualization of geometry intersection using dynamic variables](images/Untitled%2019.png)
-
-Visualization of geometry intersection using dynamic variables
+![Visualization of geometry intersection using dynamic variables](images/VisualizationOfGeometryIntersectionUsingDynamicVariables.png)
 
 ## Global Variables
 
-Grafana also has some [built-in variables (global variables)](https://grafana.com/docs/grafana/latest/variables/variable-types/global-variables/) that can be used to accomplish the same thing we did with custom variables. We can use the global variables $__from and $__to instead of the $FromTime and $ToTime we created. The time range can then be modified with the time range options in the top right of the dashboard.
+Grafana also has some [built-in variables (global variables)](https://grafana.com/docs/grafana/latest/variables/variable-types/global-variables/) that can be used to accomplish the same thing we did with custom variables. We can use the global variables ${__from:date} and ${__to:date} instead of the $FromTime and $ToTime we created. The time range can then be modified with the time range options in the top right of the dashboard.
 
-![Assigning time range using global variables](images/Untitled%2020.png)
-
-Assigning time range using global variables
+![Assigning time range using global variables](images/AssigningTimeRangeUsingGlobalVariables.png)
 
 *Note: It is important to be aware of the timezone used for the underlying data relative the the queries for global variables. Time zones can be adjusted at the bottom of the time range selection, “Change time settings”. For this example, we change the time zone to UTC to match our dataset.*
+
+# Final Dashboard
+
+The final dashboard will look like this. Note there are a couple additional query views that were note covered explicitly in the workshop.
+
+![Full Dashboard](images/Full_Dashboard.png)
