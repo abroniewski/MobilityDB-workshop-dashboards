@@ -921,7 +921,7 @@ FROM TimeClosestShips t;
           <title>Selecting Variables in dashboard settings</title>
           <mediaobject>
             <imageobject>
-              <imagedata width='40%' fileref="images/SelectingVariablesInDashboardSettings.png" />
+              <imagedata width='30%' fileref="images/SelectingVariablesInDashboardSettings.png" />
             </imageobject>
             <textobject><phrase>Selecting Variables in dashboard
             settings</phrase></textobject>
@@ -973,7 +973,7 @@ FROM TimeClosestShips t;
           <title>Creating user-defined list of custom variables</title>
           <mediaobject>
             <imageobject>
-              <imagedata width='70%' fileref="images/CreatingUserDefinedListOfCustomVariables.png" />
+              <imagedata width='80%' fileref="images/CreatingUserDefinedListOfCustomVariables.png" />
             </imageobject>
             <textobject><phrase>Creating user-defined list of custom
             variables</phrase></textobject>
@@ -1107,7 +1107,7 @@ GROUP BY P.port_name, P.lat, P.lng
       <title>Full Dashboard</title>
       <mediaobject>
         <imageobject>
-          <imagedata width='90%' fileref="images/Full_Dashboard.png" />
+          <imagedata width='100%' fileref="images/Full_Dashboard.png" />
         </imageobject>
         <textobject><phrase>Full Dashboard</phrase></textobject>
       </mediaobject>
