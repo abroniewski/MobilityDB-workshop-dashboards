@@ -7,6 +7,7 @@ CREATE EXTENSION MobilityDB CASCADE;
 -- Create table to copy flight data into
 -- all time is in epoch and will be imported as int or float and then converted
 DROP TABLE IF EXISTS flights CASCADE;
+DROP TABLE IF EXISTS flight_traj CASCADE;
 
 CREATE TABLE flights(
     et              bigint,
@@ -56,13 +57,14 @@ FROM flights
 GROUP BY icao24
 ORDER BY COUNT(lat) desc;
 
-CREATE MATERIALIZED VIEW sample AS
+CREATE MATERIALIZED VIEW single_flight AS
     SELECT *
     FROM flights
-    WHERE icao24 IN ('738286');
+    WHERE icao24 IN ('c827a6');
 
-SELECT COUNT(*) FROM sample;
-SELECT pg_size_pretty( pg_total_relation_size('sample') );
+
+SELECT COUNT(*) FROM single_flight;
+SELECT pg_size_pretty( pg_total_relation_size('single_flight') );
 
 -- ***********************************************
 -- ***REMOVING WHITESPACE FROM varchar***
@@ -202,28 +204,33 @@ CREATE TABLE flight_traj(icao24, trip, velocity, heading, vertrate, callsign, sq
 -- 26,528 rows created, execution: 2 m 23 s
 
 
-REFRESH MATERIALIZED VIEW sample;
-CREATE MATERIALIZED VIEW sample_traj AS
-    SELECT *
-    FROM flight_traj
-    WHERE icao24 IN ('738286');
+DROP MATERIALIZED VIEW single_flight;
 
-SELECT * FROM sample_traj;
-SELECT callsign FROM sample_traj;
-SELECT timestamps(callsign) FROM sample_traj;
-SELECT instants(callsign) FROM sample_traj;
-SELECT unnest(timestamps(callsign)) FROM sample_traj;
+CREATE TABLE single_flight AS (SELECT *
+                               FROM flights
+                               WHERE icao24 IN ('c827a6'));
+
+CREATE TABLE single_flight_traj AS (SELECT *
+                                    FROM flight_traj
+                                    WHERE icao24 IN ('c827a6'));
 
 
-SELECT timestamps(callsign) FROM sample_traj;
-SELECT timestampset(timestamps(callsign)) FROM sample_traj;
-SELECT CAST(timestampset(timestamps(callsign)) AS periodset) FROM sample_traj;
+SELECT * FROM single_flight_traj;
+SELECT callsign FROM single_flight_traj;
+SELECT timestamps(callsign) FROM single_flight_traj;
+SELECT instants(callsign) FROM single_flight_traj;
+SELECT unnest(timestamps(callsign)) FROM single_flight_traj;
+
+
+SELECT timestamps(callsign) FROM single_flight_traj;
+SELECT timestampset(timestamps(callsign)) FROM single_flight_traj;
+SELECT CAST(timestampset(timestamps(callsign)) AS periodset) FROM single_flight_traj;
 
 
 
 WITH time_table AS(
     SELECT unnest(timestamps(callsign)) AS ttime
-    FROM sample_traj
+    FROM single_flight_traj
 )
 SELECT ttime,
        LEAD (ttime, 1) OVER()
@@ -231,17 +238,78 @@ FROM time_table
 ORDER BY ttime;
 
 SELECT periodset(segments(velocity))
-FROM sample_traj;
+FROM single_flight_traj;
 
 SELECT periodset(segments(callsign))
-FROM sample_traj;
+FROM single_flight_traj;
 
 SELECT ttext '(A@2000-01-01, B@2000-01-03], (D@2000-01-04, C@2000-01-05]'::period;
 
--- Restriction to a period
-SELECT DeptNo, atPeriod(velocity, '[2012-01-01, 2012-04-01]')
-FROM Department;
+-- -- Restriction to a period
+-- SELECT DeptNo, atPeriod(velocity, '[2012-01-01, 2012-04-01]')
+-- FROM Department;
 
 
 
 
+-- ********************* CONTEXT MATCHING: CREATING DATASET *********************
+-- "n", "id","t","x","y","label"
+-- "1","211477000-2",2021-11-14 15:00:10,705723.070725276,6225237.28619866,"01-sailing"
+
+DROP TABLE IF EXISTS single_flight_context;
+CREATE TABLE single_flight_context (
+    n_int SERIAL,
+    n varchar(255),
+    id varchar(20),
+    t timestamp,
+    x float,
+    y float,
+    label varchar(20)
+);
+
+
+-- TODO: Find the correct coordinate systems
+INSERT INTO single_flight_context (id, t, x, y)
+SELECT icao24, et_ts,
+    ST_X(ST_Transform( ST_SetSRID(ST_MakePoint(lon, lat), 4326), 3857)) AS lon,
+       ST_Y(ST_Transform( ST_SetSRID(ST_MakePoint(lon, lat), 4326), 3857)) AS lat
+FROM single_flight
+WHERE et_ts > '2020-06-01 05:52:40' AND et_ts < '2020-06-01 07:00:00'
+ORDER BY et_ts;
+
+SELECT * FROM single_flight_context ORDER BY t;
+
+UPDATE single_flight_context
+SET label = '01-sailing'
+WHERE t > '2020-06-01 05:52:40' AND t < '2020-06-01 06:04:00';
+
+UPDATE single_flight_context
+SET label = '02-fishing'
+WHERE t >= '2020-06-01 06:04:00' AND t < '2020-06-01 06:28:30';
+
+UPDATE single_flight_context
+SET label = '03-sailing'
+WHERE t >= '2020-06-01 06:28:30' AND t < '2020-06-01 07:00:00';
+
+
+UPDATE single_flight_context SET n = CONCAT('"',CAST ( n_int AS varchar(255)),'"'),
+                          id = CONCAT('"',id,'"'),
+                          label = CONCAT('"',label,'"');
+
+SELECT * FROM single_flight_context ORDER BY t;
+
+COPY (SELECT n, id, t, x, y, label FROM single_flight_context ORDER BY t)
+    TO '/Users/adambroniewski/Documents/Work/MobilityDB-Internship/Context-Matching-Algorithm/AIS_traj/traj/1.csv'
+    WITH DELIMITER ',' CSV HEADER
+    QUOTE AS '*'
+;
+
+SELECT * FROM single_flight_traj;
+
+SELECT
+    column_name,
+    data_type
+FROM
+    information_schema.columns
+WHERE
+    table_name = 'single_flight';
