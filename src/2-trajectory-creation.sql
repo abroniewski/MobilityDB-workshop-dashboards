@@ -36,8 +36,13 @@ CREATE TABLE airframe_traj(icao24, trip, velocity, heading, vertrate, callsign, 
     GROUP BY icao24;
 -- 26,528 rows created, execution: 2 m 23 s
 
+CREATE INDEX idx_airframe_traj_trip
+ON airframe_traj USING gist (trip);
 
 CREATE TABLE single_airframe_traj AS (
     SELECT *
     FROM airframe_traj
     WHERE icao24 IN ('c827a6'));
+
+CREATE INDEX idx_single_airframe_traj_trip
+ON single_airframe_traj USING gist (trip);
