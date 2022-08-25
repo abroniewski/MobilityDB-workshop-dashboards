@@ -22,35 +22,6 @@ DROP INDEX IF EXISTS idx_airframe_traj_callsign;
 CREATE INDEX idx_airframe_traj_callsign
 ON airframe_traj USING gist (callsign);
 
--- ***DELETE*** incorrect, cartesian slice (samples as sample test below)
-EXPLAIN CREATE TABLE flight_traj(icao24, callsign, tvelocity) AS
-WITH different_flights AS (
-    SELECT icao24,
-           startvalue(unnest(segments(callsign))) AS callsign,
-           unnest( segments( callsign ) )::period AS flight_period
-    FROM airframe_traj
-)
-SELECT df.icao24, atPeriod(sf.velocity, df.flight_period)
-FROM different_flights df, airframe_traj sf;
-
-
--- TESTING with LIMIT 20
-DROP TABLE IF EXISTS flight_traj_500;
--- ISSUE: This query is applying all 20 periods to every single trajectory!!!
-EXPLAIN (ANALYZE, VERBOSE) CREATE TABLE flight_traj_500(icao24, callsign, tvelocity) AS
-WITH different_flights AS (
-    SELECT icao24,
-           startvalue(unnest(segments(callsign))) AS callsign,
-           unnest( segments( callsign ) )::period AS flight_period
-    FROM airframe_traj
-    LIMIT 20
-)
-SELECT df.icao24, df.callsign, atPeriod(sf.velocity, df.flight_period)
-FROM different_flights df, airframe_traj sf;
-
-SELECT * FROM flight_traj_500;
-
-
 
 -- THIS IS THE CORRECT QUERY TO BUILD FULL VELOCITY SLICE!!!!
 DROP TABLE IF EXISTS flight_traj;
@@ -70,22 +41,16 @@ FROM airframe_traj;
 
 SELECT * FROM flight_traj;
 
+DROP MATERIALIZED VIEW flight_traj_sample;
+CREATE MATERIALIZED VIEW flight_traj_sample AS
+    (
+    SELECT *
+    FROM flight_traj
+    LIMIT 200
+    );
+
 
 -- NOTE: There are lots of trips with NULL velocity, or other parameters....
-SELECT COUNT(*) FROM airframe_traj WHERE airframe_traj.geoaltitude IS NULL;
+SELECT COUNT(*) FROM airframe_traj WHERE airframe_traj.vertrate IS NULL;
 
-
--- CREATE SAMPLE TABLE
-DROP TABLE IF EXISTS few_flights_per_row_traj;
-EXPLAIN ANALYZE CREATE TABLE few_flights_per_row_traj(icao24, callsign, tvelocity) AS
-WITH different_flights AS (
-    SELECT icao24,
-          startvalue(unnest(segments(callsign))) AS callsign,
-          unnest(segments(callsign))::period AS flight_period
-   FROM single_airframe_traj
-)
-SELECT df.icao24, df.callsign, atPeriod(sf.velocity, df.flight_period)
-FROM different_flights df, single_airframe_traj sf;
-
-SELECT * FROM few_flights_per_row_traj;
-
+SELECT * FROM flight_traj_sample LIMIT 1;
