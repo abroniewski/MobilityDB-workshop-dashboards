@@ -1,4 +1,4 @@
-select
+EXPLAIN ANALYSE select
   name,
   setting,
   unit,
@@ -12,5 +12,5 @@ where name in (
   'max_parallel_workers_per_gather' )
   limit 10 ;
 
-set max_parallel_workers_per_gather = 2;
+set max_parallel_workers_per_gather = 4;
 set force_parallel_mode = "off";
