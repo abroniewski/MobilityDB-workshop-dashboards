@@ -1,0 +1,1138 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<chapter id ="FlightDataDashboard">
+  <title>Querying Flight Data and Creating Grafana Dashboard and Visualizations</title>
+  <section>
+    <title>Contents</title>
+    <para>
+      The module covers the following topics in 2 parts:
+    </para>
+    <para>
+      Part 1 - Working with Discrete Points
+    </para>
+    <itemizedlist spacing="compact">
+      <listitem>
+        <para>
+          Setting up a Grafana dashboard and connecting to a database
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Visualizing time-series data
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Visualizing geographic points on a map
+        </para>
+      </listitem>
+    </itemizedlist>
+    <para>
+      Part 2 - Working with Continuous Trajectories in MobilityDB
+    </para>
+    <itemizedlist spacing="compact">
+      <listitem>
+        <para>
+          Creating trajectories for each individual flight
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Visualizing statistics from temporal aggregations
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Visualizing statistics from multiple queries returning
+          temporal aggregations
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Returning value changes from temporal data
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Visualizing spatial statistics from nested temporal conditions
+          (intrinsic and dynamic)
+        </para>
+      </listitem>
+    </itemizedlist>
+  </section>
+  <section>
+    <title>Tools</title>
+    <para>
+      The tools used in this module are as follows:
+    </para>
+    <itemizedlist spacing="compact">
+      <listitem>
+        <para>
+          MobilityDB, on top of PostgreSQL and PostGIS
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Grafana (version 9.0.7)
+        </para>
+      </listitem>
+    </itemizedlist>
+  </section>
+  <section>
+    <title>Setting up the Dashboard and Connecting to Data
+    Source</title>
+    <para>
+      Data for the workshop is loaded into a MobilityDB database hosted
+      on Azure, with all login information provided in the
+      <ulink url="https://www.notion.so/Dashboard-and-Visualization-of-Ship-Trajectories-AIS-246e16838096443ea2bfa9be554a9a44">Sign-in
+      and Connect to Data Source</ulink> section below.
+    </para>
+    <para>
+      The workshop is using the following settings in Grafana to connect
+      to the postgres server on Azure. More detailed instruction to
+      setup Grafana can be found in section 2.3 to 2.5 of the Dashboard
+      and Visualization of Ship Trajectories (AIS) workshop.
+    </para>
+    <itemizedlist spacing="compact">
+      <listitem>
+        <para>
+          Name: OpenSkyLOCAL
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Host: <emphasis>20.79.254.53:5432</emphasis>
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Database: opensky
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          User: <emphasis>mobilitydb-guest</emphasis>
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Password: <emphasis>mobilitydb@guest</emphasis>
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          TLS/SSL Mode: <emphasis>disable</emphasis>
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Version: <emphasis>12+</emphasis>
+        </para>
+      </listitem>
+    </itemizedlist>
+    <para>
+      The data used for this workshop provided by
+      <ulink url="http://www.opensky-network.org">The OpenSky
+      Network</ulink>. This is data from a 24hr period from June 1, 2020
+      (<ulink url="https://opensky-network.org/datasets/states/2020-06-01/">dataset
+      link</ulink>). The raw data is originally provided in separate CSV
+      documents for each hour of the day.
+    </para>
+  </section>
+  <section>
+    <title>Creating a Dashboard</title>
+    <para>
+      Open a new browser and go to
+      <ulink url="http://localhost:3000/">http://localhost:3000/</ulink>
+      to work in your instance of Grafana. With a new dashboard we can
+      start creating the panels below.
+    </para>
+  </section>
+  <section>
+    <title>Visualizing 24hr Flight Pattern of Single Airplane</title>
+    <para>
+      We will start by looking at a single airplane. Grafana proves to
+      be a good way to quickly visualize our dataset and can be useful
+      to support pre-processing and cleaning. If using a connection to
+      the Azure database, required tables are already created.
+    </para>
+    <para>
+      A full description of each parameter is included in the
+      <ulink url="https://opensky-network.org/datasets/states/README.txt">OpenSky
+      original dataset readme</ulink>. The table structure in the Azure
+      dataset after loading and transformations looks like the
+      following:
+    </para>
+    <figure>
+      <title>First row of table <quote>single_airframe</quote>, with
+      24hrs of flight information for airplane
+      <quote>c827a6</quote></title>
+      <mediaobject>
+        <imageobject>
+          <imagedata width='50%' fileref="images/single_airframe_row1.png" />
+        </imageobject>
+        <textobject><phrase>First row of table
+        <quote>single_airframe</quote>, with 24hrs of flight information
+        for airplane <quote>c827a6</quote></phrase></textobject>
+      </mediaobject>
+    </figure>
+    <figure>
+      <title>Full table <quote>single_airframe_traj</quote> for airplane
+      <quote>c827a6</quote> with data in mobilityDB trajectories
+      format</title>
+      <mediaobject>
+        <imageobject>
+          <imagedata width='80%' fileref="images/single_airframe_traj_table.png" />
+        </imageobject>
+        <textobject><phrase>Full table
+        <quote>single_airframe_traj</quote> for airplane
+        <quote>c827a6</quote> with data in mobilityDB trajectories
+        format</phrase></textobject>
+      </mediaobject>
+    </figure>
+    <figure>
+      <title>First row of table <quote>flight_traj_sample</quote>, which
+      includes 200 flight trajectories.</title>
+      <mediaobject>
+        <imageobject>
+          <imagedata width='80%' fileref="images/flight_traj_sample_table.png" />
+        </imageobject>
+        <textobject><phrase>First row of table
+        <quote>flight_traj_sample</quote>, which includes 200 flight
+        trajectories.</phrase></textobject>
+      </mediaobject>
+    </figure>
+    <section>
+      <title>Change Timezone in Grafana</title>
+      <para>
+        Make Sure you are visualizing the data in the correct timezone.
+        The data we had was in UTC. To change the timezone,
+      </para>
+      <orderedlist numeration="arabic">
+        <listitem>
+          <para>
+            Click on the time-range panel on the top-right of the
+            window.
+          </para>
+          <figure>
+            <title>Grafana time range panel</title>
+            <mediaobject>
+              <imageobject>
+                <imagedata width='80%' fileref="images/grafana_timerange_panel_open.png" />
+              </imageobject>
+              <textobject><phrase>Grafana time range
+              panel</phrase></textobject>
+            </mediaobject>
+          </figure>
+        </listitem>
+        <listitem>
+          <para>
+            In the pop-up window, on the bottom there is <quote>Change
+            time settings</quote>. Click that to set the desired
+            timezone.
+          </para>
+        </listitem>
+      </orderedlist>
+    </section>
+    <section>
+      <title>Visualize the Coordinates of a Single Airplane</title>
+      <para>
+        Let’s visualize the latitude and longitude coordinates of an
+        airplane’s journey throughout the day. For this one we will not
+        color the geo-markers but it is possible to color them using
+        some criterion.
+      </para>
+      <orderedlist numeration="arabic">
+        <listitem>
+          <para>
+            Add a new panel
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            Select <quote>OpenSkyLOCAL</quote> as the data source
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            In Format as, change <quote>Time series</quote> to
+            <quote>Table</quote> and choose <quote>Edit SQL</quote>
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            Here you can add your SQL queries. Let’s replace the exist
+            query with the following SQL script:
+          </para>
+          <programlisting language="sql">
+--icao24 is the unique identifier for each airframe (airplane)
+SELECT et_ts, icao24, lat, lon
+-- TABLESAMPLE SYSTEM (n) returns only n% of the data from the table. 
+FROM flights TABLESAMPLE SYSTEM (5)
+WHERE icao24 IN ('738286') AND $__timeFilter(et_ts) 
+</programlisting>
+        </listitem>
+        <listitem>
+          <para>
+            Change the visualization type to
+            “<emphasis>Geomap”</emphasis>.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            The options (visualization settings - on the right side of
+            the screen) should be as follows:
+          </para>
+          <para>
+            <emphasis role="strong">Panel Options</emphasis>
+          </para>
+          <itemizedlist spacing="compact">
+            <listitem>
+              <para>
+                Title →GPS location over time
+              </para>
+            </listitem>
+          </itemizedlist>
+          <para>
+            <emphasis role="strong">Map View</emphasis>
+          </para>
+          <itemizedlist spacing="compact">
+            <listitem>
+              <para>
+                Initial view: For this one zoom in on the visualization
+                on the panel as you see fit and then click <quote>use
+                current map settings</quote> button.
+              </para>
+            </listitem>
+          </itemizedlist>
+          <para>
+            <emphasis role="strong">Data Layer</emphasis>
+          </para>
+          <itemizedlist spacing="compact">
+            <listitem>
+              <para>
+                Layer type: → <quote>markers</quote>
+              </para>
+            </listitem>
+            <listitem>
+              <para>
+                Style size → Fixed Value: 2
+              </para>
+            </listitem>
+            <listitem>
+              <para>
+                Color → Green
+              </para>
+            </listitem>
+          </itemizedlist>
+        </listitem>
+      </orderedlist>
+      <para>
+        In this visualization we can see that the airplane is visiting
+        different countries and almost completing a loop. This indicates
+        that there are more than 1 trips (flights) completed by this
+        single airplane. The coordinates are sparse because we are
+        sampling the results using <quote>TABLESAMPLE SYSTEM (5)</quote>
+        in our query. This is done to speed up the visualization.
+      </para>
+      <figure>
+        <title>Single airframe geopoints vs time</title>
+        <mediaobject>
+          <imageobject>
+            <imagedata width='80%' fileref="images/single_airframe_geopoints_vs_time.png" />
+          </imageobject>
+          <textobject><phrase>Single airframe geopoints vs
+          time</phrase></textobject>
+        </mediaobject>
+      </figure>
+    </section>
+  </section>
+  <section>
+    <title>Time-series Graphs for a Single Airplane</title>
+    <section>
+      <title>Velocity vs Time</title>
+      <para>
+        Following the similar steps to add a Geomap panel as before, we
+        include the following SQL script. Note $__timeFilter() is a
+        Grafana global variable. This global variable will inject time
+        constraint SQL-conditions from Grafana’s time range panel.
+      </para>
+      <orderedlist numeration="arabic" spacing="compact">
+        <listitem>
+          <para>
+            In Format as, use <quote>Time series</quote>
+          </para>
+        </listitem>
+      </orderedlist>
+      <programlisting language="sql">
+SELECT
+  et_ts AS &quot;time&quot;,
+  velocity
+FROM flights
+WHERE icao24 = 'c827a6' AND $__timeFilter(et_ts)
+</programlisting>
+      <orderedlist numeration="arabic">
+        <listitem>
+          <para>
+            Change the visualization type to <quote>Time Series</quote>.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            The options (visualization settings - on the right side of
+            the screen) should be as follows:
+          </para>
+          <para>
+            <emphasis role="strong">Panel Options</emphasis>
+          </para>
+          <itemizedlist spacing="compact">
+            <listitem>
+              <para>
+                Title → Single AirFrame - Velocity vs Time
+              </para>
+            </listitem>
+          </itemizedlist>
+        </listitem>
+      </orderedlist>
+      <para>
+        In the visualization we can see clearly that on this day, this
+        airframe took 3 flights. That is why its speed curve has 3
+        humps. The zero speed towards the end of each hump is a clear
+        indicator that plane stopped, thus it must have completed its
+        flight.
+      </para>
+      <figure>
+        <title>Single airframe velocity vs time</title>
+        <mediaobject>
+          <imageobject>
+            <imagedata width='80%' fileref="images/single_airframe_velocity_vs_time.png" />
+          </imageobject>
+          <textobject><phrase>Single airframe velocity vs
+          time</phrase></textobject>
+        </mediaobject>
+      </figure>
+    </section>
+    <section>
+      <title>Altitude vs Time</title>
+      <para>
+        Follow the similar steps to add a Geomap panel as before, we
+        include the following SQL script.
+      </para>
+      <orderedlist numeration="arabic" spacing="compact">
+        <listitem>
+          <para>
+            In Format as, we have <quote>Time series</quote>
+          </para>
+        </listitem>
+      </orderedlist>
+      <programlisting language="sql">
+SELECT
+  et_ts AS &quot;time&quot;,
+  baroaltitude, geoaltitude
+FROM flights
+WHERE icao24 = 'c827a6' AND $__timeFilter(et_ts)
+</programlisting>
+      <orderedlist numeration="arabic">
+        <listitem>
+          <para>
+            Change the visualization type to <quote>Time Series</quote>.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            The options (visualization settings - on the right side of
+            the screen) should be as follows:
+          </para>
+          <para>
+            <emphasis role="strong">Panel Options</emphasis>
+          </para>
+          <itemizedlist spacing="compact">
+            <listitem>
+              <para>
+                Title → Single AirFrame - Altitude vs Time
+              </para>
+            </listitem>
+          </itemizedlist>
+        </listitem>
+      </orderedlist>
+      <para>
+        In the visualization we can again see that on this day, the
+        airframe took 3 flights, as altitude reaches zero between each
+        flight. There is some noise in the data, which appear as spikes.
+        This would be almost impossible to spot in a tabular format, but
+        on a line graph these data anomalies can be easily identified.
+      </para>
+      <figure>
+        <title>Single airframe altitude vs time</title>
+        <mediaobject>
+          <imageobject>
+            <imagedata width='80%' fileref="images/single_airframe_altitude_vs_time.png" />
+          </imageobject>
+          <textobject><phrase>Single airframe altitude vs
+          time</phrase></textobject>
+        </mediaobject>
+      </figure>
+    </section>
+    <section>
+      <title>Vertical-Rate vs Time</title>
+      <para>
+        Follow the similar steps to add a Geomap panel as before, we
+        include the following SQL script.
+      </para>
+      <orderedlist numeration="arabic" spacing="compact">
+        <listitem>
+          <para>
+            In Format as, we have <quote>Time series</quote>
+          </para>
+        </listitem>
+      </orderedlist>
+      <programlisting language="sql">
+SELECT
+  et_ts AS &quot;time&quot;,
+  vertrate
+FROM flights
+WHERE icao24 = 'c827a6' AND $__timeFilter(et_ts)
+</programlisting>
+      <orderedlist numeration="arabic">
+        <listitem>
+          <para>
+            Change the visualization type to <quote>Time Series</quote>.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            The options (visualization settings - on the right side of
+            the screen) should be as follows:
+          </para>
+          <para>
+            <emphasis role="strong">Panel Options</emphasis>
+          </para>
+          <itemizedlist spacing="compact">
+            <listitem>
+              <para>
+                Title → Single AirFrame - Verticle-Rate vs Time
+              </para>
+            </listitem>
+          </itemizedlist>
+        </listitem>
+      </orderedlist>
+      <para>
+        The positive values here represents the ascent of the plane.
+        While at cruising altitude, the plane has almost zero
+        vertical-rate and during decent this value becomes negative. So
+        a sequence of positive values, then zero values followed by
+        negative values would represent a single flight.
+      </para>
+      <figure>
+        <title>Single airframe vertrate vs time</title>
+        <mediaobject>
+          <imageobject>
+            <imagedata width='80%' fileref="images/single_airframe_vertrate_vs_time.png" />
+          </imageobject>
+          <textobject><phrase>Single airframe vertrate vs
+          time</phrase></textobject>
+        </mediaobject>
+      </figure>
+    </section>
+    <section>
+      <title>Callsign vs Time</title>
+      <para>
+        The callsign is a unique identifier used for a specific flight
+        path. For example, ANZ1220 is the callsign of the Air New
+        Zealand flight 1220 from Queenstown to Auckland in New Zealand.
+        It is possible for single airplane to make the same flight more
+        than once in a 24hr period if it goes back and forth. This
+        information will be used in later queries to partition an
+        airplanes data into multiple flights.
+      </para>
+      <para>
+        We can find the time at which the callsign of an airplane
+        changes with the following steps.
+      </para>
+      <orderedlist numeration="arabic" spacing="compact">
+        <listitem>
+          <para>
+            In Format as, we have <quote>Table</quote>
+          </para>
+        </listitem>
+      </orderedlist>
+      <programlisting language="sql">
+SELECT
+  min(et_ts) AS &quot;time&quot;, callsign
+FROM flights
+WHERE icao24 = 'c827a6'
+GROUP BY callsign
+</programlisting>
+      <orderedlist numeration="arabic">
+        <listitem>
+          <para>
+            Change the visualization type to <quote>Table</quote>.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            The options (visualization settings - on the right side of
+            the screen) should be as follows:
+          </para>
+          <para>
+            <emphasis role="strong">Panel Options</emphasis>
+          </para>
+          <itemizedlist spacing="compact">
+            <listitem>
+              <para>
+                Title → Single AirFrame - Callsign vs Time
+              </para>
+            </listitem>
+          </itemizedlist>
+        </listitem>
+      </orderedlist>
+      <para>
+        In the visualization we can see that this airplane completed 3
+        flights and started the 4th one towards the very end of the day.
+        We also see there is some NULL data in the callsign column which
+        is why the first timestamp doesn’t have a corresponding
+        callsign.
+      </para>
+      <figure>
+        <title>Single airframe callsign vs time</title>
+        <mediaobject>
+          <imageobject>
+            <imagedata width='80%' fileref="images/single_airframe_callsign_vs_time.png" />
+          </imageobject>
+          <textobject><phrase>Single airframe callsign vs
+          time</phrase></textobject>
+        </mediaobject>
+      </figure>
+    </section>
+  </section>
+  <section>
+    <title>Part 2 - Working with Continuous Trajectories in
+    MobilityDB</title>
+    <para>
+      For the following queries, we will make use of trajectories for
+      aggregation and creating effective splits in our data based on
+      parameters that change in time.
+    </para>
+    <section>
+      <title>Creating MobilityDB Trajectories</title>
+      <para>
+        This step is completed once, only on the ingestion of data. It
+        is shown below to provide an understanding of how to do it. With
+        temporal datatypes and mobilityDB functionality, we can see the
+        queries are very intuitive to create.
+      </para>
+      <section>
+        <title>AirFrame Trajectories</title>
+        <para>
+          Now we are ready to construct airframe or airplane
+          trajectories out of their individual observations. Each
+          <quote>icao24</quote> in our dataset represents a single
+          airplane.
+        </para>
+        <para>
+          We can create a composite index on icao24 (unique to each
+          plane) and et_ts (timestamps of observations) to help improve
+          the performance of trajectory generation.
+        </para>
+        <programlisting language="sql">
+CREATE INDEX icao24_time_index
+    ON flights (icao24, et_ts);
+</programlisting>
+        <para>
+          We create trajectories for a single airframe because:
+        </para>
+        <itemizedlist spacing="compact">
+          <listitem>
+            <para>
+              this query serves as a simple example of how to use
+              mobilityDB to create trajectories
+            </para>
+          </listitem>
+          <listitem>
+            <para>
+              these kind of trajectories can be very important for plane
+              manufacturer, as they are interested in the airplane’s
+              analysis.
+            </para>
+          </listitem>
+          <listitem>
+            <para>
+              we are creating the building blocks for future queries.
+              Each row would represent a single flight, where flight is
+              identified by icao24 &amp; callsign.
+            </para>
+          </listitem>
+        </itemizedlist>
+        <programlisting language="sql">
+CREATE TABLE airframe_traj(icao24, trip, velocity, heading, vertrate, callsign, squawk, geoaltitude) AS
+    SELECT icao24,
+        tgeompoint_seq(array_agg(tgeompoint_inst(geom, et_ts) ORDER BY et_ts) FILTER (WHERE geom IS NOT NULL)),
+        tfloat_seq(array_agg(tfloat_inst(velocity, et_ts) ORDER BY et_ts) FILTER (WHERE velocity IS NOT NULL)),
+        tfloat_seq(array_agg(tfloat_inst(heading, et_ts) ORDER BY et_ts) FILTER (WHERE heading IS NOT NULL)),
+        tfloat_seq(array_agg(tfloat_inst(vertrate, et_ts) ORDER BY et_ts) FILTER (WHERE vertrate IS NOT NULL)),
+        ttext_seq(array_agg(ttext_inst(callsign, et_ts) ORDER BY et_ts) FILTER (WHERE callsign IS NOT NULL)),
+        tint_seq(array_agg(tint_inst(squawk, et_ts) ORDER BY et_ts) FILTER (WHERE squawk IS NOT NULL)),
+        tfloat_seq(array_agg(tfloat_inst(geoaltitude, et_ts) ORDER BY et_ts) FILTER (WHERE geoaltitude IS NOT NULL))
+    FROM flights
+    GROUP BY icao24;
+</programlisting>
+        <para>
+          Here we create a new table for all the trajectories. We select
+          all of the attributes of interest that change over time. We
+          can follow the transformation from the inner call to the outer
+          call:
+        </para>
+        <itemizedlist spacing="compact">
+          <listitem>
+            <para>
+              tgeompoint_inst: combines each geometry point(lat, long)
+              with the timestamp where that point existed
+            </para>
+          </listitem>
+          <listitem>
+            <para>
+              array_agg: aggregates all the instants together into a
+              single array for each item in the group by. In this case,
+              it will create an array for each icao24
+            </para>
+          </listitem>
+          <listitem>
+            <para>
+              tgeompoint_seq: constructs the array as a sequence which
+              can be manipulated with mobilityDB functionality. The same
+              approach is used for each trajectory, with the function
+              used changing depending on the datatype.
+            </para>
+          </listitem>
+        </itemizedlist>
+      </section>
+    </section>
+    <section>
+      <title>Flight Trajectories</title>
+      <para>
+        Right now we have, in a single row, an airframe’s (where an
+        airframe is a single physical airplane) entire day’s trip
+        information. We would like to segment that information per
+        flight (an airframe flying under a specific callsign). This
+        query segments the airframe trajectories (in temporal columns)
+        based on the time period of the callsign. Below we explain the
+        query and the reason behind segmenting the data this way.
+      </para>
+      <programlisting>
+-- Each row from airframe will end up creating a new row in flight_traj depending on when the callsign changes, regardless of whether a plane repeats the same flight multiple times in any period
+
+Airplane123 (airframe_traj) |-------------------------|
+Flightpath1 (flight_traj)   |-----|
+Flightpath2 (flight_traj)         |--------|
+Flightpath1 (flight_traj)                  |-------|
+Flightpath3 (flight_traj)                          |--|
+</programlisting>
+      <programlisting language="sql">
+CREATE TABLE flight_traj(
+    icao24, callsign, flight_period, trip, velocity, heading, vertrate, squawk, geoaltitude)
+    AS
+    -- callsign sequence unpacked into rows (rest of the values are passed from table airframe_traj because 
+    -- we don't want to call this in the query block below as that would do a crossproduct)
+    WITH airframe_traj_with_unpacked_callsign AS (
+        SELECT
+            icao24,
+            unnest(segments(callsign)) AS start_value_callsign,
+            trip,
+            velocity,
+            heading,
+            vertrate,
+            squawk,
+            geoaltitude,
+            unnest(segments(callsign))::period AS callsign_segment_period
+        FROM 
+            airframe_traj
+    )
+    SELECT icao24                                                    AS icao24,
+           start_value_callsign                                      AS callsign,
+           callsign_segment_period                                  AS flight_period,
+           atPeriod(trip, callsign_segment_period)                  AS trip,
+           atPeriod(velocity, callsign_segment_period)    AS velocity,
+           atPeriod(heading, callsign_segment_period)     AS heading,
+           atPeriod(vertrate, callsign_segment_period)    AS vertrate,
+           atPeriod(squawk, callsign_segment_period)      AS squawk,
+           atPeriod(geoaltitude, callsign_segment_period) AS geoaltitude
+    FROM airframe_traj_with_unpacked_callsign;
+</programlisting>
+      <para>
+        <emphasis role="strong">Note:</emphasis> We could have tried to
+        create the above (table ”flight_traj”) per flight trajectories
+        by simply including <quote>callsign</quote> in the GROUP BY
+        statement in the query used to create create the previous
+        airframe_traj table
+        (<literal>GROUP BY icao24, callsign;</literal>).
+      </para>
+      <para>
+        The <emphasis role="strong">problem</emphasis> with this
+        solution: This approach would put the trajectory data of 2
+        distinct flights where that airplane and flight number are the
+        same in a single row, which is not correct.
+      </para>
+      <para>
+        MobilityDB functions helped us avoid the use of several
+        hardcoded conditions that depend on user knowledge of the data.
+        This approach is very generic and can be applied anytime we want
+        to split a trajectory by the inflection points in time of some
+        other trajectory.
+      </para>
+    </section>
+  </section>
+  <section>
+    <title>Aggregating Flight Statistics</title>
+    <para>
+      We can now use our trajectories to pull flight specific statistics
+      very easily.
+    </para>
+    <section>
+      <title>Average Velocity of Each Flight</title>
+      <orderedlist numeration="arabic">
+        <listitem>
+          <para>
+            In Format as, we have <quote>Table</quote>
+          </para>
+          <programlisting language="sql">
+-- Average flight speeds during flight
+SELECT callsign,twavg(velocity) AS average_velocity
+FROM flight_traj
+WHERE twavg(velocity)IS NOT NULL -- drop rows without velocity data
+AND twavg(velocity) &lt; 1500 -- removes erroneous data
+ORDER BY twavg(velocity) desc;
+</programlisting>
+        </listitem>
+        <listitem>
+          <para>
+            Change the visualization type to <quote>Bar gauge</quote>.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            The options (visualization settings - on the right side of
+            the screen) should be as follows
+          </para>
+          <para>
+            <emphasis role="strong">Panel Options</emphasis>
+          </para>
+          <itemizedlist spacing="compact">
+            <listitem>
+              <para>
+                Title → Average Flight Speed
+              </para>
+            </listitem>
+          </itemizedlist>
+          <para>
+            <emphasis role="strong">Bar gauge</emphasis>
+          </para>
+          <itemizedlist spacing="compact">
+            <listitem>
+              <para>
+                Orientation → Horizontal
+              </para>
+            </listitem>
+          </itemizedlist>
+          <para>
+            <emphasis role="strong">Standard Options</emphasis>
+          </para>
+          <itemizedlist spacing="compact">
+            <listitem>
+              <para>
+                Unit → meters/second (m/s)
+              </para>
+            </listitem>
+            <listitem>
+              <para>
+                Min → 200
+              </para>
+            </listitem>
+          </itemizedlist>
+          <para>
+            The settings we adjust improve the visualization by cutting
+            the bar graph values of 0-200, improving the resolution at
+            higher ranges to see differences.
+          </para>
+          <figure>
+            <title>Average flight speed visualization</title>
+            <mediaobject>
+              <imageobject>
+                <imagedata width='50%' fileref="images/average_flight_speed_visualization.png" />
+              </imageobject>
+              <textobject><phrase>Average flight speed
+              visualization</phrase></textobject>
+            </mediaobject>
+          </figure>
+        </listitem>
+      </orderedlist>
+    </section>
+    <section>
+      <title>Number of Private and Commercial Flights</title>
+      <para>
+        We can easily combine results from multiple queries in the same
+        visualization in Grafana, simplifying the queries themselves.
+        Here we apply some domain knowledge of sport pilot aircraft
+        license limits for altitude and speed to provide an estimated
+        count of each.
+      </para>
+      <orderedlist numeration="arabic">
+        <listitem>
+          <para>
+            In Format as, we have <quote>Table</quote>
+          </para>
+          <programlisting language="sql">
+-- Count of flights completed by private pilots (estimate)
+SELECT COUNT(callsign) AS private_flight
+FROM flight_traj
+WHERE (maxValue(velocity) IS NOT NULL -- remove flights that did not have velocity data
+    AND maxValue(velocity) &lt;= 65) -- sport aircraft max is 140mph (65m/s)
+AND (maxValue(geoaltitude) IS NOT NULL -- remove flights that did not have altitude data
+    AND maxValue(geoaltitude) &lt;= 5500); --18,000ft (5,500m) max for private pilot
+
+-- Count of commercial flights (estimate)
+SELECT COUNT(callsign) AS commercial_flight
+FROM flight_traj
+WHERE (maxValue(velocity) IS NOT NULL 
+    AND maxValue(velocity) &gt; 65) 
+AND (maxValue(geoaltitude) IS NOT NULL 
+    AND maxValue(geoaltitude) &gt; 5500);
+</programlisting>
+          <para>
+            In Grafana, when we are in the query editor we can click on
+            <quote>+ Query</quote> at the bottom to add multiple queries
+            that provide different results.
+          </para>
+          <figure>
+            <title>Multiple queries providing results for a single
+            visualization</title>
+            <mediaobject>
+              <imageobject>
+                <imagedata width='90%' fileref="images/multiple_queries_single_visualization.png" />
+              </imageobject>
+              <textobject><phrase>Multiple queries providing results for
+              a single visualization</phrase></textobject>
+            </mediaobject>
+          </figure>
+        </listitem>
+        <listitem>
+          <para>
+            Change the visualization type to <quote>Stat</quote>.
+          </para>
+          <para>
+            To label the data for each result separately, choose
+            <quote>Overrides</quote> at the top of the options panel on
+            the right. Here you can override global panel settings for
+            specific attributes as shown below.
+          </para>
+          <figure>
+            <title>Override options for panel with multiple
+            queries</title>
+            <mediaobject>
+              <imageobject>
+                <imagedata width='50%' fileref="images/override_options_multiple_queries.png" />
+              </imageobject>
+              <textobject><phrase>Override options for panel with
+              multiple queries</phrase></textobject>
+            </mediaobject>
+          </figure>
+        </listitem>
+      </orderedlist>
+      <para>
+        The final statistics visualization will look like like this:
+      </para>
+      <figure>
+        <title>Statistic visualization of number of flights by license
+        type</title>
+        <mediaobject>
+          <imageobject>
+            <imagedata width='50%' fileref="images/statistic_visualiztion_by_flight_type.png" />
+          </imageobject>
+          <textobject><phrase>Statistic visualization of number of
+          flights by license type</phrase></textobject>
+        </mediaobject>
+      </figure>
+    </section>
+    <section>
+      <title>Flights Taking-off in Some Interval of Time
+      (User-Defined)</title>
+      <para>
+        <emphasis role="strong">Note:</emphasis> This query makes used
+        of a sample set of data that has 200 flights to return results.
+        <quote>flight_traj_sample</quote> is just a sampled version of
+        <quote>flight_traj</quote>. As of the writing of this workshop,
+        Grafana does not support display of vectors, and so individual
+        latitude and longitude points are used as a proxy.
+      </para>
+      <programlisting language="sql">
+WITH
+-- This CTE is just clipping all the temporal columns to the user specified time-range.
+flight_traj_time_slice (icao24, callsign, time_slice_trip, time_slice_geoaltitude, time_slice_vertrate) AS
+    (SELECT icao24,
+            callsign,
+            atPeriod(trip, period '[2020-06-01 03:00:00, 2020-06-01 20:30:00)'),
+            atPeriod(geoaltitude, period '[2020-06-01 03:00:00, 2020-06-01 20:30:00)'),
+            atPeriod(vertrate,
+                     period '[2020-06-01 03:00:00, 2020-06-01 20:30:00)') -- return only the portion of flight in this time period
+     FROM flight_traj_sample TABLESAMPLE SYSTEM (20)),
+
+-- There are 3 things happening in this CTE.
+-- 1. First further clips temporal columns and creates ranges that fall in the floatrange '[1, 20]', using atRagne
+-- 2. Selects the first sequences from the generated sequences, using sequenceN
+-- 3. Returns the period of the first sequence
+flight_traj_time_slice_ascent(icao24, callsign, ascending_trip, ascending_geoaltitude, ascending_vertrate) AS
+    (SELECT icao24,
+            callsign,
+            atPeriod(time_slice_trip, period(sequenceN(atRange(time_slice_vertrate, floatrange '[1,20]'), 1))),
+            atPeriod(time_slice_geoaltitude, period(sequenceN(atRange(time_slice_vertrate, floatrange '[1,20]'), 1))),
+            atPeriod(time_slice_vertrate, period(sequenceN(atRange(time_slice_vertrate, floatrange '[1,20]'), 1)))
+     FROM flight_traj_time_slice),
+
+-- This CTE unpacks the temporal columns into rows for visualization in grafana, using unnest. 
+final_output AS
+    (SELECT icao24,
+            callsign,
+            getValue(unnest(instants(ascending_geoaltitude))) AS geoaltitude,
+            getValue(unnest(instants(ascending_vertrate)))    AS vertrate,
+            ST_X(getValue(unnest(instants(ascending_trip))))  AS lon, -- will give the longitude
+            ST_Y(getValue(unnest(instants(ascending_trip))))  AS lat  -- will give the latitude
+     FROM flight_traj_time_slice_ascent)
+
+SELECT *
+FROM final_output
+WHERE vertrate IS NOT NULL
+  AND geoaltitude IS NOT NULL;
+</programlisting>
+      <para>
+        Tips for <emphasis role="strong">QGIS</emphasis> visualization:
+        QGIS uses geometry points for visualization, so for that in the
+        third CTE you can use trajectory function on ascending_trip and
+        unnest the result.
+      </para>
+      <para>
+        We will modify make the follow adjustments for the
+        visualization.
+      </para>
+      <orderedlist numeration="arabic">
+        <listitem>
+          <para>
+            Change the visualization type to <quote>Geomap</quote>.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            The options (visualization settings - on the right side of
+            the screen) should be as follows:
+          </para>
+          <para>
+            <emphasis role="strong">Panel Options</emphasis>
+          </para>
+          <itemizedlist spacing="compact">
+            <listitem>
+              <para>
+                Title → Flight Ascent in Time Window
+              </para>
+            </listitem>
+          </itemizedlist>
+          <para>
+            <emphasis role="strong">Data Layer:</emphasis>
+          </para>
+          <itemizedlist spacing="compact">
+            <listitem>
+              <para>
+                Layer type: Markers
+              </para>
+            </listitem>
+            <listitem>
+              <para>
+                Location: Coords
+              </para>
+            </listitem>
+            <listitem>
+              <para>
+                Latitude field: lat
+              </para>
+            </listitem>
+            <listitem>
+              <para>
+                Longitude field: lon
+              </para>
+            </listitem>
+            <listitem>
+              <para>
+                Styles
+              </para>
+              <itemizedlist spacing="compact">
+                <listitem>
+                  <para>
+                    Size: altitude_slice
+                  </para>
+                </listitem>
+                <listitem>
+                  <para>
+                    Min: 1
+                  </para>
+                </listitem>
+                <listitem>
+                  <para>
+                    Max: 10
+                  </para>
+                </listitem>
+                <listitem>
+                  <para>
+                    Color: altitude_slice
+                  </para>
+                </listitem>
+                <listitem>
+                  <para>
+                    Fill opacity: 0.1
+                  </para>
+                </listitem>
+              </itemizedlist>
+            </listitem>
+          </itemizedlist>
+          <para>
+            <emphasis role="strong">Standard Options:</emphasis>
+          </para>
+          <itemizedlist spacing="compact">
+            <listitem>
+              <para>
+                Unit: meter(m)
+              </para>
+            </listitem>
+            <listitem>
+              <para>
+                Color scheme: Red-Yellow-Green (by value)
+              </para>
+            </listitem>
+          </itemizedlist>
+        </listitem>
+      </orderedlist>
+      <para>
+        Here is a zoomed in version of how each flight ascent will look
+        like:
+      </para>
+      <figure>
+        <title>Zoomed in view of flight ascent</title>
+        <mediaobject>
+          <imageobject>
+            <imagedata width='90%' fileref="images/zoomed_in_view_of_flight_ascent.png" />
+          </imageobject>
+          <textobject><phrase>Zoomed in view of flight
+          ascent</phrase></textobject>
+        </mediaobject>
+      </figure>
+      <para>
+        The final visualization will look like the below.
+      </para>
+      <figure>
+        <title>Final visualization with multiple flight ascents</title>
+        <mediaobject>
+          <imageobject>
+            <imagedata width='90%' fileref="images/final_visualization_with_multiple_flight_ascents.png" />
+          </imageobject>
+          <textobject><phrase>Final visualization with multiple flight
+          ascents</phrase></textobject>
+        </mediaobject>
+      </figure>
+    </section>
+  </section>
+</chapter>
