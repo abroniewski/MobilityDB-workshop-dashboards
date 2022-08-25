@@ -4,6 +4,7 @@
 
 <!ENTITY AIS SYSTEM "AIS.xml">
 <!ENTITY AIS_Dashboard SYSTEM "AIS_Dashboard.xml">
+<!ENTITY FlightDataDashboard SYSTEM "FlightDataDashboard.xml">
 <!ENTITY GTFS SYSTEM "GTFS.xml">
 <!ENTITY location_history SYSTEM "location_history.xml">
 <!ENTITY GPX SYSTEM "GPX.xml">
@@ -52,6 +53,7 @@
 
 	&AIS;
 	&AIS_Dashboard;
+	&FlightDataDashboard;
 	&GTFS;
 	&location_history;
 	&GPX;
