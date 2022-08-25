@@ -79,3 +79,7 @@ SELECT *
 FROM final_output
 WHERE vertrate IS NOT NULL
   AND geoaltitude IS NOT NULL;
+
+SELECT * FROM flight_traj_sample
+ORDER BY icao24
+LIMIT 50;
