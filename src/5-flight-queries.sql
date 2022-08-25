@@ -42,32 +42,39 @@ ORDER BY velocity_bin;
 
 
 -- Ascending: Where are flights ascending given some interval of time?
-WITH flight_traj_time_slice (icao24, callsign, time_slice_trip, time_slice_geoaltitude, time_slice_vertrate) AS
-         (SELECT icao24,
-                 callsign,
-                 atPeriod(trip, period '[2020-06-01 03:00:00, 2020-06-01 20:30:00)'),
-                 atPeriod(geoaltitude, period '[2020-06-01 03:00:00, 2020-06-01 20:30:00)'),
-                 atPeriod(vertrate, period '[2020-06-01 03:00:00, 2020-06-01 20:30:00)') -- return only the portion of flight in this time period
-          FROM flight_traj_sample TABLESAMPLE SYSTEM (20)),
+WITH
+-- This CTE is just clipping all the temporal columns to the user specified time-range.
+flight_traj_time_slice (icao24, callsign, time_slice_trip, time_slice_geoaltitude, time_slice_vertrate) AS
+    (SELECT icao24,
+            callsign,
+            atPeriod(trip, period '[2020-06-01 03:00:00, 2020-06-01 20:30:00)'),
+            atPeriod(geoaltitude, period '[2020-06-01 03:00:00, 2020-06-01 20:30:00)'),
+            atPeriod(vertrate,
+                     period '[2020-06-01 03:00:00, 2020-06-01 20:30:00)') -- return only the portion of flight in this time period
+     FROM flight_traj_sample TABLESAMPLE SYSTEM (20)),
 
-     flight_traj_time_slice_ascent(icao24, callsign, ascending_trip, ascending_geoaltitude, ascending_vertrate) AS
-         (SELECT icao24,
-                 callsign,
-                 atPeriod(time_slice_trip, period(sequenceN(atRange(time_slice_vertrate, floatrange '[1,20]'), 1) )),
-                 atPeriod(time_slice_geoaltitude, period(sequenceN(atRange(time_slice_vertrate, floatrange '[1,20]'), 1))),
-                 atPeriod(time_slice_vertrate, period(sequenceN(atRange(time_slice_vertrate, floatrange '[1,20]'), 1)))
-          FROM flight_traj_time_slice),
+-- There are 3 things happening in this CTE.
+-- 1. First further clips temporal columns and creates ranges that fall in the floatrange '[1, 20]', using atRagne
+-- 2. Selects the first sequences from the generated sequences, using sequenceN
+-- 3. Returns the period of the first sequence
+flight_traj_time_slice_ascent(icao24, callsign, ascending_trip, ascending_geoaltitude, ascending_vertrate) AS
+    (SELECT icao24,
+            callsign,
+            atPeriod(time_slice_trip, period(sequenceN(atRange(time_slice_vertrate, floatrange '[1,20]'), 1))),
+            atPeriod(time_slice_geoaltitude, period(sequenceN(atRange(time_slice_vertrate, floatrange '[1,20]'), 1))),
+            atPeriod(time_slice_vertrate, period(sequenceN(atRange(time_slice_vertrate, floatrange '[1,20]'), 1)))
+     FROM flight_traj_time_slice),
 
-     final_output AS
-         (SELECT icao24,
-                 callsign,
-                 trajectory(ascending_trip)                       AS qgis_trajectory, -- will give a line
-                 getValue(unnest(instants(ascending_geoaltitude)))                   AS geoaltitude,
-                 getValue(unnest(instants(ascending_vertrate)))                   AS vertrate,
-                 ST_X(getValue(unnest(instants(ascending_trip)))) AS lon,             -- will give the longitude
-                 ST_Y(getValue(unnest(instants(ascending_trip)))) AS lat              -- will give the longitude
-          FROM flight_traj_time_slice_ascent
-        )
+-- This CTE unpacks the temporal columns into rows for visualization in grafana, using unnest.
+final_output AS
+    (SELECT icao24,
+            callsign,
+            getValue(unnest(instants(ascending_geoaltitude))) AS geoaltitude,
+            getValue(unnest(instants(ascending_vertrate)))    AS vertrate,
+            ST_X(getValue(unnest(instants(ascending_trip))))  AS lon, -- will give the longitude
+            ST_Y(getValue(unnest(instants(ascending_trip))))  AS lat  -- will give the latitude
+     FROM flight_traj_time_slice_ascent)
+
 SELECT *
 FROM final_output
 WHERE vertrate IS NOT NULL
