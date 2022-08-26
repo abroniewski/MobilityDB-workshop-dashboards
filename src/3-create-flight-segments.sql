@@ -24,22 +24,36 @@ ON airframe_traj USING gist (callsign);
 
 
 -- THIS IS THE CORRECT QUERY TO BUILD FULL VELOCITY SLICE!!!!
-DROP TABLE IF EXISTS flight_traj;
-EXPLAIN (ANALYSE, VERBOSE) CREATE TABLE flight_traj(
-    icao24, callsign, flight_period, trip, velocity, heading, vertrate, squawk, geoaltitude)
-    AS
-SELECT icao24                                                    AS icao24,
-       startvalue(unnest(segments(callsign)))                    AS callsign,
-       unnest(segments(callsign))::period                        AS flight_period,
-       atPeriod(trip, unnest(segments(callsign))::period)        AS trip,
-       atPeriod(velocity, unnest(segments(callsign))::period)    AS velocity,
-       atPeriod(heading, unnest(segments(callsign))::period)     AS heading,
-       atPeriod(vertrate, unnest(segments(callsign))::period)    AS vertrate,
-       atPeriod(squawk, unnest(segments(callsign))::period)      AS squawk,
-       atPeriod(geoaltitude, unnest(segments(callsign))::period) AS geoaltitude
-FROM airframe_traj;
+DROP TABLE IF EXISTS flight_traj CASCADE;
+CREATE TABLE flight_traj(icao24, callsign, flight_period, trip, velocity, heading, vertrate, squawk,
+                         geoaltitude)
+AS
+    -- callsign sequence unpacked into rows (rest of the values are passed from table airframe_traj because
+    -- we don't want to call this in the query block below as that would do a crossproduct)
+WITH airframe_traj_with_unpacked_callsign AS
+         (SELECT icao24,
+                 trip,
+                 velocity,
+                 heading,
+                 vertrate,
+                 squawk,
+                 geoaltitude,
+                 startValue(unnest(segments(callsign))) AS start_value_callsign,
+                 unnest(segments(callsign))::period     AS callsign_segment_period
+          FROM airframe_traj)
+SELECT icao24                                         AS icao24,
+       start_value_callsign                           AS callsign,
+       callsign_segment_period                        AS flight_period,
+       atPeriod(trip, callsign_segment_period)        AS trip,
+       atPeriod(velocity, callsign_segment_period)    AS velocity,
+       atPeriod(heading, callsign_segment_period)     AS heading,
+       atPeriod(vertrate, callsign_segment_period)    AS vertrate,
+       atPeriod(squawk, callsign_segment_period)      AS squawk,
+       atPeriod(geoaltitude, callsign_segment_period) AS geoaltitude
+FROM airframe_traj_with_unpacked_callsign;
 
-SELECT * FROM flight_traj;
+
+SELECT * FROM flight_traj LIMIT 1;
 
 DROP MATERIALIZED VIEW flight_traj_sample;
 CREATE MATERIALIZED VIEW flight_traj_sample AS
