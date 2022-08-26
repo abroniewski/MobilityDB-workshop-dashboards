@@ -663,17 +663,25 @@ CREATE INDEX icao24_time_index
           </listitem>
         </itemizedlist>
         <programlisting language="sql">
-CREATE TABLE airframe_traj(icao24, trip, velocity, heading, vertrate, callsign, squawk, geoaltitude) AS
-    SELECT icao24,
-        tgeompoint_seq(array_agg(tgeompoint_inst(geom, et_ts) ORDER BY et_ts) FILTER (WHERE geom IS NOT NULL)),
-        tfloat_seq(array_agg(tfloat_inst(velocity, et_ts) ORDER BY et_ts) FILTER (WHERE velocity IS NOT NULL)),
-        tfloat_seq(array_agg(tfloat_inst(heading, et_ts) ORDER BY et_ts) FILTER (WHERE heading IS NOT NULL)),
-        tfloat_seq(array_agg(tfloat_inst(vertrate, et_ts) ORDER BY et_ts) FILTER (WHERE vertrate IS NOT NULL)),
-        ttext_seq(array_agg(ttext_inst(callsign, et_ts) ORDER BY et_ts) FILTER (WHERE callsign IS NOT NULL)),
-        tint_seq(array_agg(tint_inst(squawk, et_ts) ORDER BY et_ts) FILTER (WHERE squawk IS NOT NULL)),
-        tfloat_seq(array_agg(tfloat_inst(geoaltitude, et_ts) ORDER BY et_ts) FILTER (WHERE geoaltitude IS NOT NULL))
-    FROM flights
-    GROUP BY icao24;
+CREATE TABLE airframe_traj(icao24, trip, velocity, heading, vertrate, callsign, squawk,
+                           geoaltitude) AS
+SELECT icao24,
+       tgeompoint_seq(array_agg(tgeompoint_inst(geom, et_ts) ORDER BY et_ts)
+                      FILTER (WHERE geom IS NOT NULL)),
+       tfloat_seq(array_agg(tfloat_inst(velocity, et_ts) ORDER BY et_ts)
+                  FILTER (WHERE velocity IS NOT NULL)),
+       tfloat_seq(array_agg(tfloat_inst(heading, et_ts) ORDER BY et_ts)
+                  FILTER (WHERE heading IS NOT NULL)),
+       tfloat_seq(array_agg(tfloat_inst(vertrate, et_ts) ORDER BY et_ts)
+                  FILTER (WHERE vertrate IS NOT NULL)),
+       ttext_seq(array_agg(ttext_inst(callsign, et_ts) ORDER BY et_ts)
+                 FILTER (WHERE callsign IS NOT NULL)),
+       tint_seq(array_agg(tint_inst(squawk, et_ts) ORDER BY et_ts)
+                FILTER (WHERE squawk IS NOT NULL)),
+       tfloat_seq(array_agg(tfloat_inst(geoaltitude, et_ts) ORDER BY et_ts)
+                  FILTER (WHERE geoaltitude IS NOT NULL))
+FROM flights
+GROUP BY icao24;
 </programlisting>
         <para>
           Here we create a new table for all the trajectories. We select
@@ -728,34 +736,31 @@ Flightpath3 (flight_traj)                          |--|
 </programlisting>
       <programlisting language="sql">
 CREATE TABLE flight_traj(
-    icao24, callsign, flight_period, trip, velocity, heading, vertrate, squawk, geoaltitude)
-    AS
-    -- callsign sequence unpacked into rows (rest of the values are passed from table airframe_traj because 
+                         icao24, callsign, flight_period, trip, velocity, heading, vertrate, squawk,
+                         geoaltitude)
+AS
+    -- callsign sequence unpacked into rows (rest of the values are passed from table airframe_traj because
     -- we don't want to call this in the query block below as that would do a crossproduct)
-    WITH airframe_traj_with_unpacked_callsign AS (
-        SELECT
-            icao24,
-            unnest(segments(callsign)) AS start_value_callsign,
-            trip,
-            velocity,
-            heading,
-            vertrate,
-            squawk,
-            geoaltitude,
-            unnest(segments(callsign))::period AS callsign_segment_period
-        FROM 
-            airframe_traj
-    )
-    SELECT icao24                                                    AS icao24,
-           start_value_callsign                                      AS callsign,
-           callsign_segment_period                                  AS flight_period,
-           atPeriod(trip, callsign_segment_period)                  AS trip,
-           atPeriod(velocity, callsign_segment_period)    AS velocity,
-           atPeriod(heading, callsign_segment_period)     AS heading,
-           atPeriod(vertrate, callsign_segment_period)    AS vertrate,
-           atPeriod(squawk, callsign_segment_period)      AS squawk,
-           atPeriod(geoaltitude, callsign_segment_period) AS geoaltitude
-    FROM airframe_traj_with_unpacked_callsign;
+WITH airframe_traj_with_unpacked_callsign AS (SELECT icao24,
+                                                     unnest(segments(callsign))         AS start_value_callsign,
+                                                     trip,
+                                                     velocity,
+                                                     heading,
+                                                     vertrate,
+                                                     squawk,
+                                                     geoaltitude,
+                                                     unnest(segments(callsign))::period AS callsign_segment_period
+                                              FROM airframe_traj)
+SELECT icao24                                         AS icao24,
+       start_value_callsign                           AS callsign,
+       callsign_segment_period                        AS flight_period,
+       atPeriod(trip, callsign_segment_period)        AS trip,
+       atPeriod(velocity, callsign_segment_period)    AS velocity,
+       atPeriod(heading, callsign_segment_period)     AS heading,
+       atPeriod(vertrate, callsign_segment_period)    AS vertrate,
+       atPeriod(squawk, callsign_segment_period)      AS squawk,
+       atPeriod(geoaltitude, callsign_segment_period) AS geoaltitude
+FROM airframe_traj_with_unpacked_callsign;
 </programlisting>
       <para>
         <emphasis role="strong">Note:</emphasis> We could have tried to
@@ -965,7 +970,8 @@ AND (maxValue(geoaltitude) IS NOT NULL
       <programlisting language="sql">
 WITH
 -- This CTE is just clipping all the temporal columns to the user specified time-range.
-flight_traj_time_slice (icao24, callsign, time_slice_trip, time_slice_geoaltitude, time_slice_vertrate) AS
+flight_traj_time_slice (icao24, callsign, time_slice_trip, time_slice_geoaltitude,
+                        time_slice_vertrate) AS
     (SELECT icao24,
             callsign,
             atPeriod(trip, period '[2020-06-01 03:00:00, 2020-06-01 20:30:00)'),
@@ -975,15 +981,19 @@ flight_traj_time_slice (icao24, callsign, time_slice_trip, time_slice_geoaltitud
      FROM flight_traj_sample TABLESAMPLE SYSTEM (20)),
 
 -- There are 3 things happening in this CTE.
--- 1. First further clips temporal columns and creates ranges that fall in the floatrange '[1, 20]', using atRagne
+-- 1. First further clips temporal columns and creates ranges that fall in the floatrange '[1, 20]', using atRange
 -- 2. Selects the first sequences from the generated sequences, using sequenceN
 -- 3. Returns the period of the first sequence
-flight_traj_time_slice_ascent(icao24, callsign, ascending_trip, ascending_geoaltitude, ascending_vertrate) AS
+flight_traj_time_slice_ascent(icao24, callsign, ascending_trip, ascending_geoaltitude,
+                              ascending_vertrate) AS
     (SELECT icao24,
             callsign,
-            atPeriod(time_slice_trip, period(sequenceN(atRange(time_slice_vertrate, floatrange '[1,20]'), 1))),
-            atPeriod(time_slice_geoaltitude, period(sequenceN(atRange(time_slice_vertrate, floatrange '[1,20]'), 1))),
-            atPeriod(time_slice_vertrate, period(sequenceN(atRange(time_slice_vertrate, floatrange '[1,20]'), 1)))
+            atPeriod(time_slice_trip,
+                     period(sequenceN(atRange(time_slice_vertrate, floatrange '[1,20]'), 1))),
+            atPeriod(time_slice_geoaltitude,
+                     period(sequenceN(atRange(time_slice_vertrate, floatrange '[1,20]'), 1))),
+            atPeriod(time_slice_vertrate,
+                     period(sequenceN(atRange(time_slice_vertrate, floatrange '[1,20]'), 1)))
      FROM flight_traj_time_slice),
 
 -- This CTE unpacks the temporal columns into rows for visualization in grafana, using unnest. 
