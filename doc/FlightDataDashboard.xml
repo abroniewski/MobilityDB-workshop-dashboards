@@ -89,7 +89,7 @@
     <para>
       The workshop is using the following settings in Grafana to connect
       to the postgres server on Azure. More detailed instruction to
-      setup Grafana can be found in section 2.3 to 2.5 of the Dashboard
+      set up Grafana can be found in section 2.3 to 2.5 of the Dashboard
       and Visualization of Ship Trajectories (AIS) workshop.
     </para>
     <itemizedlist spacing="compact">
@@ -238,7 +238,7 @@
       <para>
         Let’s visualize the latitude and longitude coordinates of an
         airplane’s journey throughout the day. For this one we will not
-        color the geo-markers but it is possible to color them using
+        color the geo-markers, but it is possible to color them using
         some criterion.
       </para>
       <orderedlist numeration="arabic">
@@ -260,11 +260,11 @@
         </listitem>
         <listitem>
           <para>
-            Here you can add your SQL queries. Let’s replace the exist
+            Here you can add your SQL queries. Let’s replace the existing
             query with the following SQL script:
           </para>
           <programlisting language="sql">
---icao24 is the unique identifier for each airframe (airplane)
+-- icao24 is the unique identifier for each airframe (airplane)
 SELECT et_ts, icao24, lat, lon
 -- TABLESAMPLE SYSTEM (n) returns only n% of the data from the table. 
 FROM flights TABLESAMPLE SYSTEM (5)
@@ -685,7 +685,7 @@ GROUP BY icao24;
 </programlisting>
         <para>
           Here we create a new table for all the trajectories. We select
-          all of the attributes of interest that change over time. We
+          all the attributes of interest that change over time. We
           can follow the transformation from the inner call to the outer
           call:
         </para>
@@ -726,7 +726,8 @@ GROUP BY icao24;
         query and the reason behind segmenting the data this way.
       </para>
       <programlisting>
--- Each row from airframe will end up creating a new row in flight_traj depending on when the callsign changes, regardless of whether a plane repeats the same flight multiple times in any period
+-- Each row from airframe will create a new row in flight_traj depending on when the callsign
+-- changes, regardless of whether a plane repeats the same flight multiple times in any period
 
 Airplane123 (airframe_traj) |-------------------------|
 Flightpath1 (flight_traj)   |-----|
@@ -735,22 +736,21 @@ Flightpath1 (flight_traj)                  |-------|
 Flightpath3 (flight_traj)                          |--|
 </programlisting>
       <programlisting language="sql">
-CREATE TABLE flight_traj(
-                         icao24, callsign, flight_period, trip, velocity, heading, vertrate, squawk,
+CREATE TABLE flight_traj(icao24, callsign, flight_period, trip, velocity, heading, vertrate, squawk,
                          geoaltitude)
 AS
-    -- callsign sequence unpacked into rows (rest of the values are passed from table airframe_traj because
-    -- we don't want to call this in the query block below as that would do a crossproduct)
-WITH airframe_traj_with_unpacked_callsign AS (SELECT icao24,
-                                                     unnest(segments(callsign))         AS start_value_callsign,
-                                                     trip,
-                                                     velocity,
-                                                     heading,
-                                                     vertrate,
-                                                     squawk,
-                                                     geoaltitude,
-                                                     unnest(segments(callsign))::period AS callsign_segment_period
-                                              FROM airframe_traj)
+    -- callsign sequence unpacked into rows to split all other temporal sequences.
+WITH airframe_traj_with_unpacked_callsign AS
+         (SELECT icao24,
+                 trip,
+                 velocity,
+                 heading,
+                 vertrate,
+                 squawk,
+                 geoaltitude,
+                 startValue(unnest(segments(callsign))) AS start_value_callsign,
+                 unnest(segments(callsign))::period     AS callsign_segment_period
+          FROM airframe_traj)
 SELECT icao24                                         AS icao24,
        start_value_callsign                           AS callsign,
        callsign_segment_period                        AS flight_period,
@@ -766,7 +766,7 @@ FROM airframe_traj_with_unpacked_callsign;
         <emphasis role="strong">Note:</emphasis> We could have tried to
         create the above (table ”flight_traj”) per flight trajectories
         by simply including <quote>callsign</quote> in the GROUP BY
-        statement in the query used to create create the previous
+        statement in the query used to create the previous
         airframe_traj table
         (<literal>GROUP BY icao24, callsign;</literal>).
       </para>
@@ -885,12 +885,12 @@ ORDER BY twavg(velocity) desc;
             In Format as, we have <quote>Table</quote>
           </para>
           <programlisting language="sql">
--- Count of flights completed by private pilots (estimate)
+-- Flights completed by private pilots (estimate)
 SELECT COUNT(callsign) AS private_flight
 FROM flight_traj
-WHERE (maxValue(velocity) IS NOT NULL -- remove flights that did not have velocity data
+WHERE (maxValue(velocity) IS NOT NULL -- remove flights without velocity
     AND maxValue(velocity) &lt;= 65) -- sport aircraft max is 140mph (65m/s)
-AND (maxValue(geoaltitude) IS NOT NULL -- remove flights that did not have altitude data
+AND (maxValue(geoaltitude) IS NOT NULL -- remove flights without altitude
     AND maxValue(geoaltitude) &lt;= 5500); --18,000ft (5,500m) max for private pilot
 
 -- Count of commercial flights (estimate)
@@ -900,7 +900,7 @@ WHERE (maxValue(velocity) IS NOT NULL
     AND maxValue(velocity) &gt; 65) 
 AND (maxValue(geoaltitude) IS NOT NULL 
     AND maxValue(geoaltitude) &gt; 5500);
-</programlisting>
+          </programlisting>
           <para>
             In Grafana, when we are in the query editor we can click on
             <quote>+ Query</quote> at the bottom to add multiple queries
@@ -942,7 +942,7 @@ AND (maxValue(geoaltitude) IS NOT NULL
         </listitem>
       </orderedlist>
       <para>
-        The final statistics visualization will look like like this:
+        The final statistics visualization will look like this:
       </para>
       <figure>
         <title>Statistic visualization of number of flights by license
@@ -969,7 +969,8 @@ AND (maxValue(geoaltitude) IS NOT NULL
       </para>
       <programlisting language="sql">
 WITH
--- This CTE is just clipping all the temporal columns to the user specified time-range.
+-- The flight_traj_time_slice CTE is clipping all the temporal columns
+-- to the user specified time-range.
 flight_traj_time_slice (icao24, callsign, time_slice_trip, time_slice_geoaltitude,
                         time_slice_vertrate) AS
     (SELECT icao24,
@@ -977,13 +978,15 @@ flight_traj_time_slice (icao24, callsign, time_slice_trip, time_slice_geoaltitud
             atPeriod(trip, period '[2020-06-01 03:00:00, 2020-06-01 20:30:00)'),
             atPeriod(geoaltitude, period '[2020-06-01 03:00:00, 2020-06-01 20:30:00)'),
             atPeriod(vertrate,
-                     period '[2020-06-01 03:00:00, 2020-06-01 20:30:00)') -- return only the portion of flight in this time period
+                     period '[2020-06-01 03:00:00, 2020-06-01 20:30:00)')
      FROM flight_traj_sample TABLESAMPLE SYSTEM (20)),
 
--- There are 3 things happening in this CTE.
--- 1. First further clips temporal columns and creates ranges that fall in the floatrange '[1, 20]', using atRange
--- 2. Selects the first sequences from the generated sequences, using sequenceN
--- 3. Returns the period of the first sequence
+-- There are 3 things happening in the flight_traj_time_slice_ascent CTE:
+-- 1. atRange: Clips the temporal data to create ranges where the vertrate was between '[1, 20]'.
+--  This vertrate means an aircraft was ascending.
+-- 2. sequenceN: Selects the first sequence from the generated sequences.
+--  This first sequence is takeoff and eliminates mid-flight ascents.
+-- 3. atPeriod: Returns the period of the first sequence.
 flight_traj_time_slice_ascent(icao24, callsign, ascending_trip, ascending_geoaltitude,
                               ascending_vertrate) AS
     (SELECT icao24,
@@ -996,14 +999,15 @@ flight_traj_time_slice_ascent(icao24, callsign, ascending_trip, ascending_geoalt
                      period(sequenceN(atRange(time_slice_vertrate, floatrange '[1,20]'), 1)))
      FROM flight_traj_time_slice),
 
--- This CTE unpacks the temporal columns into rows for visualization in grafana, using unnest. 
+-- The final_output CTE uses unnest to unpack the temporal data into rows for visualization in Grafana.
+-- Each row will contain a latitude, longitude and the altitude and vertrate at those locations.
 final_output AS
     (SELECT icao24,
             callsign,
             getValue(unnest(instants(ascending_geoaltitude))) AS geoaltitude,
             getValue(unnest(instants(ascending_vertrate)))    AS vertrate,
-            ST_X(getValue(unnest(instants(ascending_trip))))  AS lon, -- will give the longitude
-            ST_Y(getValue(unnest(instants(ascending_trip))))  AS lat  -- will give the latitude
+            ST_X(getValue(unnest(instants(ascending_trip))))  AS lon,
+            ST_Y(getValue(unnest(instants(ascending_trip))))  AS lat
      FROM flight_traj_time_slice_ascent)
 
 SELECT *
