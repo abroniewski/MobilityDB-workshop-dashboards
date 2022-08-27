@@ -22,14 +22,20 @@ DROP INDEX IF EXISTS idx_airframe_traj_callsign;
 CREATE INDEX idx_airframe_traj_callsign
 ON airframe_traj USING gist (callsign);
 
+-- Each row from airframe will create a new row in flight_traj depending on when the callsign
+-- changes, regardless of whether a plane repeats the same flight multiple times in any period
 
--- THIS IS THE CORRECT QUERY TO BUILD FULL VELOCITY SLICE!!!!
+-- Airplane123 (airframe_traj) |-------------------------|
+-- Flightpath1 (flight_traj)   |-----|
+-- Flightpath2 (flight_traj)         |--------|
+-- Flightpath1 (flight_traj)                  |-------|
+-- Flightpath3 (flight_traj)                          |--|
+
 DROP TABLE IF EXISTS flight_traj CASCADE;
 CREATE TABLE flight_traj(icao24, callsign, flight_period, trip, velocity, heading, vertrate, squawk,
                          geoaltitude)
 AS
-    -- callsign sequence unpacked into rows (rest of the values are passed from table airframe_traj because
-    -- we don't want to call this in the query block below as that would do a crossproduct)
+    -- callsign sequence unpacked into rows to split all other temporal sequences.
 WITH airframe_traj_with_unpacked_callsign AS
          (SELECT icao24,
                  trip,
@@ -55,7 +61,7 @@ FROM airframe_traj_with_unpacked_callsign;
 
 SELECT * FROM flight_traj LIMIT 1;
 
-DROP MATERIALIZED VIEW flight_traj_sample;
+DROP MATERIALIZED VIEW IF EXISTS flight_traj_sample;
 CREATE MATERIALIZED VIEW flight_traj_sample AS
     (
     SELECT *
