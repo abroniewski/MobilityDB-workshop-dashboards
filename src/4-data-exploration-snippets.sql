@@ -73,3 +73,8 @@ SELECT icao24,
        unnest( segments( callsign ) )::period AS flight_period
 FROM airframe_traj
 WHERE icao24 IN ('ae04b0');
+
+SELECT
+    COUNT(*) FILTER (WHERE geom IS NULL) AS null_geom,
+    COUNT(*) FILTER (WHERE velocity IS NULL) AS null_velocity
+FROM flights;
