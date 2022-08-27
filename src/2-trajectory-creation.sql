@@ -23,17 +23,25 @@ UPDATE flights SET
 --      In this case, it will create an array for each icao24
 -- 3. tgeompoint_seq: constructs the array as a sequence which can be manipulated with mobilityDB functionality
 -- The same approach is used for each trajectory, with the function used changing depending on the datatype
-CREATE TABLE airframe_traj(icao24, trip, velocity, heading, vertrate, callsign, squawk, geoaltitude) AS
-    SELECT icao24,
-        tgeompoint_seq(array_agg(tgeompoint_inst(geom, et_ts) ORDER BY et_ts) FILTER (WHERE geom IS NOT NULL)),
-        tfloat_seq(array_agg(tfloat_inst(velocity, et_ts) ORDER BY et_ts) FILTER (WHERE velocity IS NOT NULL)),
-        tfloat_seq(array_agg(tfloat_inst(heading, et_ts) ORDER BY et_ts) FILTER (WHERE heading IS NOT NULL)),
-        tfloat_seq(array_agg(tfloat_inst(vertrate, et_ts) ORDER BY et_ts) FILTER (WHERE vertrate IS NOT NULL)),
-        ttext_seq(array_agg(ttext_inst(callsign, et_ts) ORDER BY et_ts) FILTER (WHERE callsign IS NOT NULL)),
-        tint_seq(array_agg(tint_inst(squawk, et_ts) ORDER BY et_ts) FILTER (WHERE squawk IS NOT NULL)),
-        tfloat_seq(array_agg(tfloat_inst(geoaltitude, et_ts) ORDER BY et_ts) FILTER (WHERE geoaltitude IS NOT NULL))
-    FROM flights
-    GROUP BY icao24;
+CREATE TABLE airframe_traj(icao24, trip, velocity, heading, vertrate, callsign, squawk,
+                           geoaltitude) AS
+SELECT icao24,
+       tgeompoint_seq(array_agg(tgeompoint_inst(geom, et_ts) ORDER BY et_ts)
+                      FILTER (WHERE geom IS NOT NULL)),
+       tfloat_seq(array_agg(tfloat_inst(velocity, et_ts) ORDER BY et_ts)
+                  FILTER (WHERE velocity IS NOT NULL)),
+       tfloat_seq(array_agg(tfloat_inst(heading, et_ts) ORDER BY et_ts)
+                  FILTER (WHERE heading IS NOT NULL)),
+       tfloat_seq(array_agg(tfloat_inst(vertrate, et_ts) ORDER BY et_ts)
+                  FILTER (WHERE vertrate IS NOT NULL)),
+       ttext_seq(array_agg(ttext_inst(callsign, et_ts) ORDER BY et_ts)
+                 FILTER (WHERE callsign IS NOT NULL)),
+       tint_seq(array_agg(tint_inst(squawk, et_ts) ORDER BY et_ts)
+                FILTER (WHERE squawk IS NOT NULL)),
+       tfloat_seq(array_agg(tfloat_inst(geoaltitude, et_ts) ORDER BY et_ts)
+                  FILTER (WHERE geoaltitude IS NOT NULL))
+FROM flights
+GROUP BY icao24;
 -- 26,528 rows created, execution: 2 m 23 s
 
 CREATE INDEX idx_airframe_traj_trip
