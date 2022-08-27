@@ -35,6 +35,10 @@ Find/replace "<imagedata fileref"
     note: some pictures will need to have their width set manually.
 Remove <section xml:id=...> from XML file
 Remove </section> from XML file
+Replace "<"
+    with "&lt;"
+Replace ">"
+    with "&gt;"
 
 COPY AIS_Dashboard.xml into parent doc folder
 COPY all images from the notion export folder into the doc/images folder
