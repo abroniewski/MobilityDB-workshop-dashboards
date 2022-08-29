@@ -56,8 +56,8 @@ flight_traj_time_slice (icao24, callsign, time_slice_trip, time_slice_geoaltitud
      FROM flight_traj_sample TABLESAMPLE SYSTEM (20)),
 
 -- There are 3 things happening in the flight_traj_time_slice_ascent CTE:
--- 1. atRange: Clips the temporal data to create ranges where the vertrate was between '[1, 20]'.
---  This vertrate means an aircraft was ascending.
+-- 1. atRange: Clips the temporal data to create ranges where the vertrate
+-- was between '[1, 20]'. This vertrate means an aircraft was ascending.
 -- 2. sequenceN: Selects the first sequence from the generated sequences.
 --  This first sequence is takeoff and eliminates mid-flight ascents.
 -- 3. atPerido: Returns the period of the first sequence.
@@ -66,11 +66,14 @@ flight_traj_time_slice_ascent(icao24, callsign, ascending_trip, ascending_geoalt
     (SELECT icao24,
             callsign,
             atPeriod(time_slice_trip,
-                     period(sequenceN(atRange(time_slice_vertrate, floatrange '[1,20]'), 1))),
+                     period(sequenceN(
+                         atRange(time_slice_vertrate, floatrange '[1,20]'), 1))),
             atPeriod(time_slice_geoaltitude,
-                     period(sequenceN(atRange(time_slice_vertrate, floatrange '[1,20]'), 1))),
+                     period(sequenceN(atRange(time_slice_vertrate, floatrange '[1,20]'),
+                                      1))),
             atPeriod(time_slice_vertrate,
-                     period(sequenceN(atRange(time_slice_vertrate, floatrange '[1,20]'), 1)))
+                     period(sequenceN(atRange(time_slice_vertrate, floatrange '[1,20]'),
+                                      1)))
      FROM flight_traj_time_slice),
 
 -- The final_output CTE uses unnest to unpack the temporal data into rows for visualization in Grafana.
