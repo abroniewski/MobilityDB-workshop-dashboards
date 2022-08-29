@@ -76,8 +76,9 @@ flight_traj_time_slice_ascent(icao24, callsign, ascending_trip, ascending_geoalt
                                       1)))
      FROM flight_traj_time_slice),
 
--- The final_output CTE uses unnest to unpack the temporal data into rows for visualization in Grafana.
--- Each row will contain a latitude, longitude and the altitude and vertrate at those locations.
+-- The final_output CTE uses unnest to unpack the temporal data into rows for
+-- visualization in Grafana. Each row will contain a latitude, longitude and the altitude
+-- and vertrate at those locations.
 final_output AS
     (SELECT icao24,
             callsign,
