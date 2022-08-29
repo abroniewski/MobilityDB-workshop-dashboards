@@ -7,7 +7,7 @@ of the modules.
 Documentation
 -------------
 
-You can generate the workshop documentation from the sources.
+You can generate the workshop documentation from the sources. Go to `doc` folder and: 
 *  In HTML format
 
         xsltproc --stringparam html.stylesheet "docbook.css" --xinclude -o index.html /usr/share/xml/docbook/stylesheet/docbook-xsl/html/chunk.xsl mobilitydb-workshop.xml
