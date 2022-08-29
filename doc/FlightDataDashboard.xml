@@ -78,6 +78,108 @@
     </itemizedlist>
   </section>
   <section>
+    <title>Preparing the Database</title>
+    <para>
+      <ulink url="https://opensky-network.org/datasets/states/2020-06-01/">Dataset
+      link</ulink>
+    </para>
+    <para>
+      Create a new database <quote>opensky</quote>, then use your SQL
+      editor to create the MobilityDB extension as follows:
+    </para>
+    <programlisting language="sql">
+CREATE EXTENSION MobilityDB CASCADE;
+</programlisting>
+    <para>
+      The CASCADE command will additionally create the PostGIS
+      extension.
+    </para>
+    <para>
+      Now create a table in which the CSV file will be loaded:
+    </para>
+    <programlisting language="sql">
+CREATE TABLE flights(
+    et              bigint,
+    icao24          varchar(20),
+    lat             float,
+    lon             float,
+    velocity        float,
+    heading         float,
+    vertrate        float,
+    callsign        varchar(10),
+    onground        boolean,
+    alert           boolean,
+    spi             boolean,
+    squawk          integer,
+    baroaltitude    numeric(7,2),
+    geoaltitude     numeric(7,2),
+    lastposupdate   numeric(13,3),
+    lastcontact     numeric(13,3)
+);
+</programlisting>
+    <para>
+      Load the data into the database using the following command.
+      Replace the <literal>&lt;path_to_file&gt;</literal> with the
+      actual path of the CSV file. Do this for all files.
+    </para>
+    <programlisting language="sql">
+COPY flights(et, icao24, lat, lon, velocity, heading, 
+		 vertrate, callsign, onground, alert, spi, squawk,
+		 baroaltitude, geoaltitude, lastposupdate, lastcontact) 
+FROM '&lt;path_to_file&gt;' DELIMITER  ',' CSV HEADER;
+</programlisting>
+    <para>
+      All the times in this dataset are in unix timestamp (an integer)
+      with timezone being UTC. So we need to convert them to PostgreSQL
+      timestamp type.
+    </para>
+    <programlisting language="sql">
+ALTER TABLE flights
+    ADD COLUMN et_ts timestamp,
+    ADD COLUMN lastposupdate_ts timestamp,
+    ADD COLUMN lastcontact_ts timestamp;
+    
+UPDATE flights
+    SET et_ts = to_timestamp(et),
+        lastposupdate_ts = to_timestamp(lastposupdate),
+        lastcontact_ts = to_timestamp(lastcontact);
+</programlisting>
+    <para>
+      You can check the size of the database with:
+    </para>
+    <programlisting language="sql">
+SELECT pg_size_pretty( pg_total_relation_size('flights') );
+</programlisting>
+    <section>
+      <title>Data Cleaning</title>
+      <para>
+        Delete all icao24 that have all NULL latitudes
+      </para>
+      <programlisting language="sql">
+-- icao24_with_null_lat is used to provide a list of rows that will be deleted
+WITH icao24_with_null_lat AS (
+    SELECT icao24, COUNT(lat)
+    FROM flights
+    GROUP BY icao24
+    HAVING COUNT(lat) = 0
+      )
+DELETE
+FROM flights
+WHERE icao24 IN
+      -- this SELECT statement is needed for the IN statement to compare against a list
+    (SELECT icao24 FROM icao24_with_null_lat);
+</programlisting>
+      <para>
+        Note: This data cleaning is not comprehensive. It was just to
+        highlight that before creating trajectories, it may be very
+        important to have a look at the data and do some cleaning as
+        that will directly impact the quality of mobilityDB trajectories
+        being created. If there as NULLs in mobilityDB trajectories,
+        some operation on it can give error.
+      </para>
+    </section>
+  </section>
+  <section>
     <title>Setting up the Dashboard and Connecting to Data
     Source</title>
     <para>
@@ -620,6 +722,17 @@ GROUP BY callsign
         temporal datatypes and mobilityDB functionality, we can see the
         queries are very intuitive to create.
       </para>
+      <para>
+        We first create a geometry point. This treats each latitude and
+        longitude as a point in space. 4326 is the SRID.
+      </para>
+      <programlisting language="sql">
+ALTER TABLE flights
+    ADD COLUMN geom geometry(Point, 4326);
+
+UPDATE flights SET
+  geom = ST_SetSRID( ST_MakePoint( lon, lat ), 4326);
+</programlisting>
       <section>
         <title>AirFrame Trajectories</title>
         <para>
