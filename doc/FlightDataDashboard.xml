@@ -839,18 +839,19 @@ GROUP BY icao24;
         query and the reason behind segmenting the data this way.
       </para>
       <programlisting>
--- Each row from airframe will create a new row in flight_traj depending on when the callsign
--- changes, regardless of whether a plane repeats the same flight multiple times in any period
+-- Each row from airframe will create a new row in flight_traj depending on when the
+-- callsign changes, regardless of whether a plane repeats the same flight multiple
+-- times in any period
 
-Airplane123 (airframe_traj) |-------------------------|
-Flightpath1 (flight_traj)   |-----|
-Flightpath2 (flight_traj)         |--------|
-Flightpath1 (flight_traj)                  |-------|
-Flightpath3 (flight_traj)                          |--|
+-- Airplane123 (airframe_traj) |-------------------------|
+-- Flightpath1 (flight_traj)   |-----|
+-- Flightpath2 (flight_traj)         |--------|
+-- Flightpath1 (flight_traj)                  |-------|
+-- Flightpath3 (flight_traj)                          |--|
 </programlisting>
       <programlisting language="sql">
-CREATE TABLE flight_traj(icao24, callsign, flight_period, trip, velocity, heading, vertrate, squawk,
-                         geoaltitude)
+CREATE TABLE flight_traj(icao24, callsign, flight_period, trip, velocity, heading,
+                         vertrate, squawk, geoaltitude)
 AS
     -- callsign sequence unpacked into rows to split all other temporal sequences.
 WITH airframe_traj_with_unpacked_callsign AS
@@ -864,6 +865,7 @@ WITH airframe_traj_with_unpacked_callsign AS
                  startValue(unnest(segments(callsign))) AS start_value_callsign,
                  unnest(segments(callsign))::period     AS callsign_segment_period
           FROM airframe_traj)
+
 SELECT icao24                                         AS icao24,
        start_value_callsign                           AS callsign,
        callsign_segment_period                        AS flight_period,
