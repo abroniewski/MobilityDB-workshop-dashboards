@@ -1271,7 +1271,7 @@ WHERE vertrate IS NOT NULL
                             <itemizedlist spacing="compact">
                                 <listitem>
                                     <para>
-                                        Size: altitude_slice
+                                        Size: geoaltitude
                                     </para>
                                 </listitem>
                                 <listitem>
@@ -1281,17 +1281,17 @@ WHERE vertrate IS NOT NULL
                                 </listitem>
                                 <listitem>
                                     <para>
-                                        Max: 10
+                                        Max: 5
                                     </para>
                                 </listitem>
                                 <listitem>
                                     <para>
-                                        Color: altitude_slice
+                                        Color: vertrate
                                     </para>
                                 </listitem>
                                 <listitem>
                                     <para>
-                                        Fill opacity: 0.1
+                                        Fill opacity: 0.5
                                     </para>
                                 </listitem>
                             </itemizedlist>
@@ -1303,26 +1303,58 @@ WHERE vertrate IS NOT NULL
                     <itemizedlist spacing="compact">
                         <listitem>
                             <para>
-                                Unit: meter(m)
+                                Unit: meters/second (m/s)
                             </para>
                         </listitem>
                         <listitem>
                             <para>
-                                Color scheme: Red-Yellow-Green (by value)
+                                Color scheme: Green-Yellow-Red (by value)
                             </para>
                         </listitem>
                     </itemizedlist>
                 </listitem>
-            </orderedlist>
+                <listitem>
             <para>
-                Here is a zoomed in version of how each flight ascent will look
-                like:
+                We will also add a manual override (top right of panel options, beside "All") to limit the minimum value of vertebrate. This will make all values
+                below the minimum the same color, making larger values more obvious. This can be used to quickly
+                pinpoint locations where a large rate of ascent existed.
+            </para>
+                    <para>
+                        <emphasis role="strong">Overrides</emphasis>
+                    </para>
+                    <itemizedlist spacing="compact">
+                        <listitem>
+                            <para>
+                                Add field override > Fields with name > vertrate
+                            </para>
+                        </listitem>
+                        <itemizedlist spacing="compact">
+                            <listitem>
+                                <para>
+                                    Min: 5
+                                </para>
+                            </listitem>
+                            <listitem>
+                                <para>
+                                    Max: 20
+                                </para>
+                            </listitem>
+                        </itemizedlist>
+                    </itemizedlist>
+                </listitem>
+
+                </orderedlist>
+            <para>
+                Here is a zoomed in version of how each individual flight ascent will look, as well as a view of
+                multiple flights at the same time. The marker size is increasing with altitude, and the color is showing
+                more aggressive vertical ascent rates. We can see towards the end of the visualized ascent period, there
+                is a short increased vertical ascent rate.
             </para>
             <figure>
                 <title>Zoomed in view of flight ascent</title>
                 <mediaobject>
                     <imageobject>
-                        <imagedata width='90%' fileref="images/zoomed_in_view_of_flight_ascent.png"/>
+                        <imagedata width='60%' fileref="images/zoomed_in_view_of_flight_ascent.png"/>
                     </imageobject>
                     <textobject>
                         <phrase>Zoomed in view of flight
@@ -1338,7 +1370,7 @@ WHERE vertrate IS NOT NULL
                 <title>Final visualization with multiple flight ascents</title>
                 <mediaobject>
                     <imageobject>
-                        <imagedata width='90%' fileref="images/final_visualization_with_multiple_flight_ascents.png"/>
+                        <imagedata width='70%' fileref="images/final_visualization_with_multiple_flight_ascents.png"/>
                     </imageobject>
                     <textobject>
                         <phrase>Final visualization with multiple flight
@@ -1349,4 +1381,25 @@ WHERE vertrate IS NOT NULL
             </figure>
         </section>
     </section>
+        <section><title>Complete Flight Data Business Intelligence Dashboard</title>
+            <para>
+                The dashboard, with all the visualizations at the same time, will look like the screenshot below. Here
+                we can continue to extend the dashboards functionality by adding more dynamic variables to have the individual flight
+                data on the left generated with a user query or selection based on the overview take-off
+                information on the right. This is what really empowers decision makers and subject-matter experts (SMEs) to
+                quickly move through data and hone-in on important aspects that may have otherwise been over-looked.
+            </para>
+            <figure>
+                <title>Flight data business intelligence dashboard</title>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata width='95%' fileref="images/FlightDashboard_final_visualization.png"/>
+                    </imageobject>
+                    <textobject>
+                        <phrase>Flight data business intelligence dashboard
+                        </phrase>
+                    </textobject>
+                </mediaobject>
+            </figure>
+        </section>
 </chapter>
