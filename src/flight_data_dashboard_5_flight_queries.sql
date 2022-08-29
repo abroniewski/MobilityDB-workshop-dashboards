@@ -53,7 +53,7 @@ flight_traj_time_slice (icao24, callsign, time_slice_trip, time_slice_geoaltitud
             atPeriod(geoaltitude, period '[2020-06-01 03:00:00, 2020-06-01 20:30:00)'),
             atPeriod(vertrate,
                      period '[2020-06-01 03:00:00, 2020-06-01 20:30:00)')
-     FROM flight_traj_sample TABLESAMPLE SYSTEM (20)),
+     FROM flight_traj_sample),
 
 -- There are 3 things happening in the flight_traj_time_slice_ascent CTE:
 -- 1. atRange: Clips the temporal data to create ranges where the vertrate
@@ -91,8 +91,8 @@ final_output AS
 SELECT *
 FROM final_output
 WHERE vertrate IS NOT NULL
-  AND geoaltitude IS NOT NULL;
+  AND geoaltitude IS NOT NULL
+ORDER BY icao24;
 
 SELECT * FROM flight_traj_sample
-ORDER BY icao24
-LIMIT 50;
+ORDER BY icao24;

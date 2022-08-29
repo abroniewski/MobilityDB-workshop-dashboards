@@ -68,10 +68,15 @@ CREATE MATERIALIZED VIEW flight_traj_sample AS
     (
     SELECT *
     FROM flight_traj
+    WHERE trip IS NOT NULL
+    AND vertrate IS NOT NULL
+    ORDER BY icao24
     LIMIT 200
     );
 
-
+REFRESH MATERIALIZED VIEW flight_traj_sample;
+SELECT * FROM flight_traj_sample
+ORDER BY icao24;
 -- NOTE: There are lots of trips with NULL velocity, or other parameters....
 SELECT COUNT(*) FROM airframe_traj WHERE airframe_traj.vertrate IS NULL;
 
